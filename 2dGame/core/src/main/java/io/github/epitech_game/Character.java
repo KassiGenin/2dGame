@@ -6,23 +6,38 @@ public abstract class Character {
     protected float speed;
     protected Boolean isHittable;
     protected Boolean isAlive;
+    protected float x;
+    protected float y;
 
-    public Character(int hp, int ap, float speed, Boolean isHittable, Boolean isAlive) {
+    public Character(int hp, int ap, float speed, Boolean isHittable) {
         this.hp = hp;
         this.ap = ap;
         this.speed = speed;
         this.isHittable = isHittable;
-        this.isAlive = isAlive;
+        this.isAlive = true;
+        this.x = 0;
+        this.y = 0;
     }
 
-    public void move() {
+    public void setPosition(float x, float y) {
+        this.x = x;
+        this.y = y;
     }
 
-    public void attack() {
+    public float getX() {
+        return x;
     }
+
+    public float getY() {
+        return y;
+    }
+
+    public abstract void move();
+
+    public abstract void attack();
 
     public void takeDamage(int damage) {
-        if (this.isHittable){
+        if (this.isHittable) {
             this.hp -= damage;
             if (this.hp <= 0) {
                 this.isAlive = false;
