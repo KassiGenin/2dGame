@@ -13,16 +13,6 @@ public class Main extends ApplicationAdapter {
     private SpriteBatch spriteBatch;
     private BitmapFont font;
 
-    @Override
-    public void create() {
-        // Create an instance of a Character subclass
-        hero = new Hero(100, 200, 50);
-
-        // Initialize rendering objects
-        spriteBatch = new SpriteBatch();
-        font = new BitmapFont();
-        font.setColor(Color.WHITE); // Set the font color to white
-    }
 
     @Override
     public void render() {
@@ -31,27 +21,8 @@ public class Main extends ApplicationAdapter {
 
         // Draw the character's speed on the screen
         spriteBatch.begin();
-        font.draw(spriteBatch, "Character Speed: " + hero.speed, 20, Gdx.graphics.getHeight() - 20);
+        font.draw(spriteBatch, "Character Speed: " , 20, Gdx.graphics.getHeight() - 20);
         spriteBatch.end();
     }
 
-    @Override
-    public void dispose() {
-        // Clean up resources
-        spriteBatch.dispose();
-        font.dispose();
-    }
-
-    // Simple Hero subclass of Character
-    public static class Hero extends Character {
-        public Hero(float x, float y, float speed) {
-            super(x, y, speed);
-        }
-
-        @Override
-        public void move(float deltaX, float deltaY) {
-            x += deltaX * speed;
-            y += deltaY * speed;
-        }
-    }
 }
