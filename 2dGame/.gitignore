@@ -166,3 +166,4 @@ Thumbs.db
 
 ##For avoidind conflicts in OS
 /lwjgl3/gradle.properties
+/.idea/workspace.xml
