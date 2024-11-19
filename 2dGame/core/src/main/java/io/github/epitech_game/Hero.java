@@ -17,10 +17,15 @@ public class Hero extends Character {
     private float dashTimer = 0f; // Timer for ongoing dash
     private boolean isDashing = false; // Whether the hero is dashing
     private float dashDirectionX = 0f, dashDirectionY = 0f; // Direction of the dash
+    private float attackCooldownTimer = 0f;
+    private final float ATTACK_COOLDOWN = 0.3f; // Attack cooldown time
+    private final float ATTACK_DURATION = 0.2f; // Slash animation duration
+    private boolean isAttacking = false;
+    private float attackTimer = 0f;
 
     // Animation-related fields
-    private Texture spriteSheet;
-    private Texture sideSpriteSheet;
+    private final Texture spriteSheet;
+    private final Texture sideSpriteSheet;
     private Texture rightSpriteSheet;
     private Texture upDashSpriteSheet;
     private Texture downDashSpriteSheet;
@@ -28,14 +33,22 @@ public class Hero extends Character {
     private Texture rightDashSpriteSheet;
     private Texture heartSpriteSheet, heartBg, heartBorder;
     private TextureRegion[] hearts;
+    private Texture slashDownSheet, slashUpSheet, slashRightSheet, slashLeftSheet;
+
+    // New attack spritesheets
+    private Texture attackUpSheet, attackDownSheet, attackLeftSheet, attackRightSheet;
 
     private Animation<TextureRegion> walkDown, walkLeft, walkUp, walkRight;
     private Animation<TextureRegion> dashDown, dashLeft, dashUp, dashRight;
     private Animation<TextureRegion> currentAnimation;
+    private Animation<TextureRegion> slashDown, slashUp, slashRight, slashLeft;
+    private Animation<TextureRegion> attackUpAnimation, attackDownAnimation, attackLeftAnimation, attackRightAnimation;
+    private Animation<TextureRegion> currentAttackAnimation;
+    private Animation<TextureRegion> currentAttackHeroAnimation;
     private float stateTime;
 
     public Hero() {
-        super(38, 100, 3.5f, true);
+        super(37, 100, 3.5f, true);
         this.maxHp = 40;
 
         // Load spritesheets
@@ -49,32 +62,57 @@ public class Hero extends Character {
         heartSpriteSheet = new Texture("heart.png");
         heartBg = new Texture("heartbg.png");
         heartBorder = new Texture("heartborder.png");
+        slashDownSheet = new Texture("slashDown.png");
+        slashUpSheet = new Texture("slashUp.png");
+        slashRightSheet = new Texture("slashRight.png");
+        slashLeftSheet = new Texture("slashLeft.png");
+
+        // Load new attack spritesheets
+        attackUpSheet = new Texture("attackUp.png");
+        attackDownSheet = new Texture("attackDown.png");
+        attackLeftSheet = new Texture("attackLeft.png");
+        attackRightSheet = new Texture("attackRight.png");
 
         // Extract frames
         TextureRegion[][] frames = TextureRegion.split(spriteSheet, 32, 33);
         TextureRegion[][] sideFrames = TextureRegion.split(sideSpriteSheet, 32, 32);
         TextureRegion[][] rightFrames = TextureRegion.split(rightSpriteSheet, 32, 32);
-        TextureRegion[][] upDashFrames = TextureRegion.split(upDashSpriteSheet, 32, 32);
-        TextureRegion[][] downDashFrames = TextureRegion.split(downDashSpriteSheet, 32, 32);
+        TextureRegion[][] upDashFrames = TextureRegion.split(upDashSpriteSheet, 31, 32);
+        TextureRegion[][] downDashFrames = TextureRegion.split(downDashSpriteSheet, 31, 32);
         TextureRegion[][] leftDashFrames = TextureRegion.split(leftDashSpriteSheet, 32, 32);
         TextureRegion[][] rightDashFrames = TextureRegion.split(rightDashSpriteSheet, 32, 32);
         TextureRegion[][] heartFrames = TextureRegion.split(heartSpriteSheet, 17, 17);
+
+        // Extract attack frames
+        TextureRegion[][] attackUpFrames = TextureRegion.split(attackUpSheet, 32, 32);
+        TextureRegion[][] attackDownFrames = TextureRegion.split(attackDownSheet, 32, 32);
+        TextureRegion[][] attackLeftFrames = TextureRegion.split(attackLeftSheet, 32, 32);
+        TextureRegion[][] attackRightFrames = TextureRegion.split(attackRightSheet, 32, 32);
+
         // Create animations
         walkDown = createAnimation(frames, 2, 0, 9);
         walkLeft = createAnimation(sideFrames, 0, 0, 9);
         walkUp = createAnimation(frames, 2, 22, 30);
         walkRight = createAnimation(rightFrames, 0, 0, 9);
-        dashDown = createAnimation(downDashFrames, 0, 0, 9, DASH_DURATION);
-        dashLeft = createAnimation(leftDashFrames, 0, 0, 9, DASH_DURATION);
-        dashUp = createAnimation(upDashFrames, 0, 0, 9, DASH_DURATION);
-        dashRight = createAnimation(rightDashFrames, 0, 0, 9, DASH_DURATION);
+        dashDown = createAnimation(downDashFrames, 0, 0, 7, DASH_DURATION);
+        dashLeft = createAnimation(leftDashFrames, 0, 0, 6, DASH_DURATION);
+        dashUp = createAnimation(upDashFrames, 0, 0, 7, DASH_DURATION);
+        dashRight = createAnimation(rightDashFrames, 0, 0, 6, DASH_DURATION);
+        slashDown = createAnimation(TextureRegion.split(slashDownSheet, 54, 37), false, false);
+        slashUp = createAnimation(TextureRegion.split(slashUpSheet, 27, 65), false, true);
+        slashRight = createAnimation(TextureRegion.split(slashRightSheet, 66, 27), true, false);
+        slashLeft = createAnimation(TextureRegion.split(slashLeftSheet, 65, 27), true, false);
 
+        // Create attack animations
+        attackUpAnimation = new Animation<>(0.1f, attackUpFrames[0]);
+        attackDownAnimation = new Animation<>(0.1f, attackDownFrames[0]);
+        attackLeftAnimation = new Animation<>(0.1f, attackLeftFrames[0]);
+        attackRightAnimation = new Animation<>(0.1f, attackRightFrames[0]);
 
         hearts = new TextureRegion[5];
         for (int i = 0; i < 5; i++) {
             hearts[i] = heartFrames[0][i];
         }
-
 
         // Default animation
         currentAnimation = walkDown;
@@ -82,6 +120,20 @@ public class Hero extends Character {
         stateTime = 0f; // Initialize animation time
     }
 
+    private Animation<TextureRegion> createAnimation(TextureRegion[][] frames, boolean horizontal, boolean reverseVertical) {
+        int frameCount = horizontal ? frames[0].length : frames.length;
+        TextureRegion[] animationFrames = new TextureRegion[frameCount];
+
+        for (int i = 0; i < frameCount; i++) {
+            if (horizontal) {
+                animationFrames[i] = frames[0][horizontal ? i : frameCount - 1 - i]; // Left-to-right or right-to-left
+            } else {
+                animationFrames[i] = frames[reverseVertical ? frameCount - 1 - i : i][0]; // Top-to-bottom or bottom-to-top
+            }
+        }
+
+        return new Animation<>(ATTACK_DURATION / frameCount, animationFrames);
+    }
 
     public Animation<TextureRegion> createAnimation(TextureRegion[][] frames, int row, int startCol, int endCol, float duration) {
         TextureRegion[] animationFrames = new TextureRegion[endCol - startCol + 1];
@@ -91,7 +143,6 @@ public class Hero extends Character {
         }
         return new Animation<>(frameDuration, animationFrames);
     }
-
 
     public void renderHearts(SpriteBatch spriteBatch) {
         int totalHearts = maxHp / 4; // Total heart containers
@@ -120,11 +171,12 @@ public class Hero extends Character {
         }
     }
 
-
     @Override
     public void move() {
         float deltaTime = Gdx.graphics.getDeltaTime();
         boolean isMoving = false;
+
+        attackCooldownTimer += deltaTime;
 
         // Handle dashing
         if (isDashing) {
@@ -132,47 +184,51 @@ public class Hero extends Character {
             x += dashDirectionX * DASH_DISTANCE * deltaTime / DASH_DURATION;
             y += dashDirectionY * DASH_DISTANCE * deltaTime / DASH_DURATION;
 
-            // Update animation state for dash
             stateTime += deltaTime;
 
-            // Stop dashing when the duration ends
             if (dashTimer >= DASH_DURATION) {
                 isDashing = false;
-                dashCooldownTimer = 0f; // Reset cooldown
+                dashCooldownTimer = 0f;
             }
-            return; // Skip normal movement while dashing
+            return;
         }
 
         dashCooldownTimer += deltaTime;
 
-        // Handle normal movement
-        if (Gdx.input.isKeyPressed(Input.Keys.W)) {
-            y += speed;
-            currentAnimation = walkUp;
-            isMoving = true;
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-            y -= speed;
-            currentAnimation = walkDown;
-            isMoving = true;
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.A)) {
-            x -= speed;
-            currentAnimation = walkLeft;
-            isMoving = true;
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.D)) {
-            x += speed;
-            currentAnimation = walkRight;
-            isMoving = true;
+        // Handle movement
+        if (!isAttacking) { // Disable movement while attacking
+            if (Gdx.input.isKeyPressed(Input.Keys.W)) {
+                y += speed;
+                currentAnimation = walkUp;
+                isMoving = true;
+            }
+            if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+                y -= speed;
+                currentAnimation = walkDown;
+                isMoving = true;
+            }
+            if (Gdx.input.isKeyPressed(Input.Keys.A)) {
+                x -= speed;
+                currentAnimation = walkLeft;
+                isMoving = true;
+            }
+            if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+                x += speed;
+                currentAnimation = walkRight;
+                isMoving = true;
+            }
         }
 
-        // Trigger dash
+        // Handle attack
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER) && attackCooldownTimer >= ATTACK_COOLDOWN) {
+            attack();
+        }
+
+        // Handle dashing
         if (Gdx.input.isKeyJustPressed(Input.Keys.SHIFT_LEFT) && dashCooldownTimer >= DASH_COOLDOWN) {
             startDash();
         }
 
-        // Update animation state only when moving
         if (isMoving) {
             stateTime += deltaTime;
         }
@@ -210,12 +266,95 @@ public class Hero extends Character {
     }
 
     public void render(SpriteBatch spriteBatch) {
-        TextureRegion currentFrame = currentAnimation.getKeyFrame(stateTime, true);
-        spriteBatch.draw(currentFrame, x, y, currentFrame.getRegionWidth() * Main.SCALE_FACTOR, currentFrame.getRegionHeight() * Main.SCALE_FACTOR);    }
+        TextureRegion currentFrame;
 
-    @Override
+        if (isAttacking) {
+            // Render attack animation
+            attackTimer += Gdx.graphics.getDeltaTime();
+
+            TextureRegion currentHeroAttackFrame = currentAttackHeroAnimation.getKeyFrame(attackTimer, false);
+            TextureRegion currentSlashFrame = currentAttackAnimation.getKeyFrame(attackTimer, false);
+
+            // Draw the hero's attack frame at hero's position
+            spriteBatch.draw(
+                currentHeroAttackFrame,
+                x,
+                y,
+                currentHeroAttackFrame.getRegionWidth() * Main.SCALE_FACTOR,
+                currentHeroAttackFrame.getRegionHeight() * Main.SCALE_FACTOR
+            );
+
+            // Position the slash animation based on direction
+            if (currentAttackAnimation == slashUp) {
+                spriteBatch.draw(
+                    currentSlashFrame,
+                    x,
+                    y + 32 * Main.SCALE_FACTOR,
+                    currentSlashFrame.getRegionWidth() * Main.SCALE_FACTOR,
+                    currentSlashFrame.getRegionHeight() * Main.SCALE_FACTOR
+                );
+            } else if (currentAttackAnimation == slashDown) {
+                spriteBatch.draw(
+                    currentSlashFrame,
+                    x,
+                    y - 37 * Main.SCALE_FACTOR,
+                    currentSlashFrame.getRegionWidth() * Main.SCALE_FACTOR,
+                    currentSlashFrame.getRegionHeight() * Main.SCALE_FACTOR
+                );
+            } else if (currentAttackAnimation == slashLeft) {
+                spriteBatch.draw(
+                    currentSlashFrame,
+                    x - 66 * Main.SCALE_FACTOR,
+                    y,
+                    currentSlashFrame.getRegionWidth() * Main.SCALE_FACTOR,
+                    currentSlashFrame.getRegionHeight() * Main.SCALE_FACTOR
+                );
+            } else if (currentAttackAnimation == slashRight) {
+                spriteBatch.draw(
+                    currentSlashFrame,
+                    x + 32 * Main.SCALE_FACTOR,
+                    y,
+                    currentSlashFrame.getRegionWidth() * Main.SCALE_FACTOR,
+                    currentSlashFrame.getRegionHeight() * Main.SCALE_FACTOR
+                );
+            }
+
+            // End the attack animation when it finishes
+            if (attackTimer >= ATTACK_DURATION) {
+                isAttacking = false;
+            }
+        } else {
+            // Render normal hero animation
+            currentFrame = currentAnimation.getKeyFrame(stateTime, true);
+            spriteBatch.draw(
+                currentFrame,
+                x,
+                y,
+                currentFrame.getRegionWidth() * Main.SCALE_FACTOR,
+                currentFrame.getRegionHeight() * Main.SCALE_FACTOR
+            );
+        }
+    }
+
     public void attack() {
-        // Attack logic remains unchanged
+        isAttacking = true;
+        attackTimer = 0f;
+        attackCooldownTimer = 0f;
+
+        // Choose the correct animation based on direction
+        if (currentAnimation == walkUp) {
+            currentAttackAnimation = slashUp;
+            currentAttackHeroAnimation = attackUpAnimation;
+        } else if (currentAnimation == walkDown) {
+            currentAttackAnimation = slashDown;
+            currentAttackHeroAnimation = attackDownAnimation;
+        } else if (currentAnimation == walkLeft) {
+            currentAttackAnimation = slashLeft;
+            currentAttackHeroAnimation = attackLeftAnimation;
+        } else {
+            currentAttackAnimation = slashRight;
+            currentAttackHeroAnimation = attackRightAnimation;
+        }
     }
 
     public void armoredDamage(int damage) {
@@ -228,7 +367,6 @@ public class Hero extends Character {
     }
 
     public void dispose() {
-
         if (spriteSheet != null) spriteSheet.dispose();
         if (sideSpriteSheet != null) sideSpriteSheet.dispose();
         if (rightSpriteSheet != null) rightSpriteSheet.dispose();
@@ -239,5 +377,15 @@ public class Hero extends Character {
         heartSpriteSheet.dispose();
         heartBg.dispose();
         heartBorder.dispose();
+        if (slashDownSheet != null) slashDownSheet.dispose();
+        if (slashUpSheet != null) slashUpSheet.dispose();
+        if (slashLeftSheet != null) slashLeftSheet.dispose();
+        if (slashRightSheet != null) slashRightSheet.dispose();
+
+        // Dispose new attack spritesheets
+        if (attackUpSheet != null) attackUpSheet.dispose();
+        if (attackDownSheet != null) attackDownSheet.dispose();
+        if (attackLeftSheet != null) attackLeftSheet.dispose();
+        if (attackRightSheet != null) attackRightSheet.dispose();
     }
 }
