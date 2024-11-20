@@ -40,13 +40,12 @@ public abstract class Character {
         for (int i = startCol; i <= endCol; i++) {
             animationFrames[i - startCol] = frames[row][i];
         }
-        return new Animation<>(0.1f, animationFrames); // Each frame lasts 0.1 seconds
+        return new Animation<>(0.1f, animationFrames);
     }
 
     public abstract void move();
 
     public abstract void attack();
-
 
     public void takeDamage(int damage) {
         if (this.isHittable) {
@@ -55,6 +54,19 @@ public abstract class Character {
                 this.isAlive = false;
             }
         }
+    }
+
+    public void update() {
+        if (!isAlive) {
+            handleDeath();
+        }
+    }
+
+    public void handleDeath() {
+        this.hp = 0;
+        this.ap = 0;
+        this.speed = 0;
+        this.isHittable = false;
     }
 
     public int getHp() {
@@ -96,6 +108,4 @@ public abstract class Character {
     public void setIsAlive(Boolean isAlive) {
         this.isAlive = isAlive;
     }
-
-
 }

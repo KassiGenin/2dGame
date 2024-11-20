@@ -6,10 +6,13 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Rectangle;
+
 
 public class Hero extends Character {
 
     protected int maxHp;
+    private boolean isDead = false;
     private float dashCooldownTimer = 0f;
     private final float DASH_COOLDOWN = 1f; // Cooldown time for dash
     private final float DASH_DURATION = 0.5f; // Duration of the dash
@@ -22,6 +25,10 @@ public class Hero extends Character {
     private final float ATTACK_DURATION = 0.2f; // Slash animation duration
     private boolean isAttacking = false;
     private float attackTimer = 0f;
+    private float stateTime;
+    private boolean isInvincible = false;
+    private float invincibleTimer = 0f;
+
 
     // Animation-related fields
     private final Texture spriteSheet;
@@ -34,10 +41,7 @@ public class Hero extends Character {
     private Texture heartSpriteSheet, heartBg, heartBorder;
     private TextureRegion[] hearts;
     private Texture slashDownSheet, slashUpSheet, slashRightSheet, slashLeftSheet;
-
-    // New attack spritesheets
     private Texture attackUpSheet, attackDownSheet, attackLeftSheet, attackRightSheet;
-
     private Animation<TextureRegion> walkDown, walkLeft, walkUp, walkRight;
     private Animation<TextureRegion> dashDown, dashLeft, dashUp, dashRight;
     private Animation<TextureRegion> currentAnimation;
@@ -45,7 +49,6 @@ public class Hero extends Character {
     private Animation<TextureRegion> attackUpAnimation, attackDownAnimation, attackLeftAnimation, attackRightAnimation;
     private Animation<TextureRegion> currentAttackAnimation;
     private Animation<TextureRegion> currentAttackHeroAnimation;
-    private float stateTime;
 
     public Hero() {
         super(37, 100, 3.5f, true);
@@ -99,7 +102,7 @@ public class Hero extends Character {
         dashUp = createAnimation(upDashFrames, 0, 0, 7, DASH_DURATION);
         dashRight = createAnimation(rightDashFrames, 0, 0, 6, DASH_DURATION);
         slashDown = createAnimation(TextureRegion.split(slashDownSheet, 54, 37), false, false);
-        slashUp = createAnimation(TextureRegion.split(slashUpSheet, 27, 65), false, true);
+        slashUp = createAnimation(TextureRegion.split(slashUpSheet, 54, 37), false, true);
         slashRight = createAnimation(TextureRegion.split(slashRightSheet, 66, 27), true, false);
         slashLeft = createAnimation(TextureRegion.split(slashLeftSheet, 65, 27), true, false);
 
@@ -118,6 +121,90 @@ public class Hero extends Character {
         currentAnimation = walkDown;
 
         stateTime = 0f; // Initialize animation time
+    }
+
+    @Override
+    public void update() {
+        super.update();
+        if (isInvincible) {
+            invincibleTimer -= Gdx.graphics.getDeltaTime();
+            if (invincibleTimer <= 0f) {
+                isInvincible = false;
+                invincibleTimer = 0f;
+            }
+        }
+    }
+    @Override
+    public void takeDamage(int damage) {
+        if (this.isHittable && !isInvincible) {
+            this.hp -= damage;
+            if (this.hp <= 0) {
+                this.isAlive = false;
+            }
+            setInvincible(0.5f);
+        }
+    }
+
+
+    public void setInvincible(float duration) {
+        isInvincible = true;
+        invincibleTimer = duration;
+    }
+
+    @Override
+    public void handleDeath() {
+        isDead = true;
+        this.speed = 0;
+        this.isHittable = false;
+    }
+
+
+    public boolean isDead() {
+        return isDead;
+    }
+
+
+    public Rectangle getAttackBounds() {
+        if (!isAttacking) {
+            return null;
+        }
+
+        float attackX = x;
+        float attackY = y;
+        float attackWidth = 0;
+        float attackHeight = 0;
+
+        TextureRegion currentSlashFrame = currentAttackAnimation.getKeyFrame(attackTimer, false);
+
+        float scale = 0.8f;
+
+        if (currentAttackAnimation == slashUp) {
+            attackX = x;
+            attackY = y + 32 * scale;
+            attackWidth = currentSlashFrame.getRegionWidth() * 1.2f;
+            attackHeight = currentSlashFrame.getRegionHeight() * 1.2f;
+        } else if (currentAttackAnimation == slashDown) {
+            attackX = x;
+            attackY = y - 37 * scale;
+            attackWidth = currentSlashFrame.getRegionWidth() * scale;
+            attackHeight = currentSlashFrame.getRegionHeight() * scale;
+        } else if (currentAttackAnimation == slashLeft) {
+            attackX = x - 66 * scale;
+            attackY = y;
+            attackWidth = currentSlashFrame.getRegionWidth() * scale;
+            attackHeight = currentSlashFrame.getRegionHeight() * scale;
+        } else if (currentAttackAnimation == slashRight) {
+            attackX = x + 32 * scale;
+            attackY = y;
+            attackWidth = currentSlashFrame.getRegionWidth() * scale;
+            attackHeight = currentSlashFrame.getRegionHeight() * scale;
+        }
+
+        return new Rectangle(attackX, attackY, attackWidth, attackHeight);
+    }
+
+    public boolean isAttacking() {
+        return isAttacking;
     }
 
     private Animation<TextureRegion> createAnimation(TextureRegion[][] frames, boolean horizontal, boolean reverseVertical) {
@@ -289,33 +376,33 @@ public class Hero extends Character {
                 spriteBatch.draw(
                     currentSlashFrame,
                     x,
-                    y + 32 * Main.SCALE_FACTOR,
-                    currentSlashFrame.getRegionWidth() * Main.SCALE_FACTOR,
-                    currentSlashFrame.getRegionHeight() * Main.SCALE_FACTOR
+                    y + 32 * 1.2f,
+                    currentSlashFrame.getRegionWidth() * 1.9f,
+                    currentSlashFrame.getRegionHeight() * 1.9f
                 );
             } else if (currentAttackAnimation == slashDown) {
                 spriteBatch.draw(
                     currentSlashFrame,
                     x,
-                    y - 37 * Main.SCALE_FACTOR,
-                    currentSlashFrame.getRegionWidth() * Main.SCALE_FACTOR,
-                    currentSlashFrame.getRegionHeight() * Main.SCALE_FACTOR
+                    y - 37 * 1.2f,
+                    currentSlashFrame.getRegionWidth() * 1.9f,
+                    currentSlashFrame.getRegionHeight() * 1.9f
                 );
             } else if (currentAttackAnimation == slashLeft) {
                 spriteBatch.draw(
                     currentSlashFrame,
-                    x - 66 * Main.SCALE_FACTOR,
+                    x - 66 * 1.3f,
                     y,
-                    currentSlashFrame.getRegionWidth() * Main.SCALE_FACTOR,
-                    currentSlashFrame.getRegionHeight() * Main.SCALE_FACTOR
+                    currentSlashFrame.getRegionWidth() * 1.7f,
+                    currentSlashFrame.getRegionHeight() * 1.7f
                 );
             } else if (currentAttackAnimation == slashRight) {
                 spriteBatch.draw(
                     currentSlashFrame,
-                    x + 32 * Main.SCALE_FACTOR,
-                    y,
-                    currentSlashFrame.getRegionWidth() * Main.SCALE_FACTOR,
-                    currentSlashFrame.getRegionHeight() * Main.SCALE_FACTOR
+                    x + 32 * 1.5f,
+                    y+10,
+                    currentSlashFrame.getRegionWidth() * 1.7f,
+                    currentSlashFrame.getRegionHeight() * 1.7f
                 );
             }
 
@@ -365,6 +452,7 @@ public class Hero extends Character {
             }
         }
     }
+
 
     public void dispose() {
         if (spriteSheet != null) spriteSheet.dispose();

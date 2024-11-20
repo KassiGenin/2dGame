@@ -10,12 +10,14 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.badlogic.gdx.Input;
+import com.badlogic.gdx.math.Rectangle;
 
 public class Main extends ApplicationAdapter {
     public static final float SCALE_FACTOR = 2.5f; // Scaling sprites to 2.5x their original size
 
     private Hero hero;
-    private NPC npc;
+    private Fly fly;
     private SpriteBatch spriteBatch;
     private ShapeRenderer shapeRenderer;
     private OrthographicCamera camera;
@@ -23,20 +25,19 @@ public class Main extends ApplicationAdapter {
     private BitmapFont font;
     private float stateTime;
 
+    private boolean isPaused = false;
+
+    // Pause menu variables
+    private String[] pauseMenuOptions = {"Resume", "Settings", "Credits"};
+    private int selectedOption = 0;
+    private boolean inCredits = false;
+
     @Override
     public void create() {
-        // Initialize Hero and NPC
+        // Initialize characters
         hero = new Hero();
-
-        npc = new NPC("Guide",
-            new com.badlogic.gdx.utils.Array<>(new String[]{
-                "Hello, traveler!",
-                "The world is full of mysteries...",
-                "Be careful out there!"
-            }),
-            100, "NPC1.png");
-
-        npc.setPosition(700, 600); // Position the NPC on the screen
+        fly = new Fly(hero);
+        fly.setPosition(300, 300);
 
         // Initialize rendering tools
         spriteBatch = new SpriteBatch();
@@ -56,50 +57,118 @@ public class Main extends ApplicationAdapter {
     @Override
     public void render() {
         float deltaTime = Gdx.graphics.getDeltaTime();
-        stateTime += deltaTime; // Update state time for animations
 
-        // Clear the screen
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        // Handle pause input
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+            isPaused = !isPaused;
+        }
 
-        // Update hero movement
-        hero.move();
+        if (!isPaused) {
+            if (!hero.isDead()) {
+                hero.update();
+                hero.move();
 
-        // Check if hero is in the NPC's zone and update NPC dialogue
-        npc.checkHeroInZone(hero);
-        String currentDialogue = npc.updateDialogue(deltaTime);
+                if (fly != null) {
+                    fly.update();
+                    fly.move();
+                    fly.attack();
 
-        camera.update();
-        spriteBatch.setProjectionMatrix(camera.combined);
+                    // Check for collision between hero's attack and fly
+                    Rectangle attackBounds = hero.getAttackBounds();
+                    if (attackBounds != null && fly.isAlive()) {
+                        Rectangle flyBounds = fly.getBounds();
+                        if (attackBounds.overlaps(flyBounds)) {
+                            fly.takeDamage(hero.getAp());
+                        }
+                    }
 
-        // Begin rendering
-        spriteBatch.begin();
-        npc.render(spriteBatch, stateTime); // Render NPC with scaling applied
-        hero.render(spriteBatch);
-        hero.renderHearts(spriteBatch);
-        spriteBatch.end();
+                    // Remove fly if it's dead and not dying (death animation finished)
+                    if (!fly.isAlive() && !fly.isDying()) {
+                        fly.dispose();
+                        fly = null; // Remove fly from the game
+                    }
+                }
 
-        // Draw dialogue box if NPC text is available
-        if (currentDialogue != null) {
-            renderDialogueBox(currentDialogue);
+                camera.update();
+                spriteBatch.setProjectionMatrix(camera.combined);
+
+                Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+                spriteBatch.begin();
+                hero.render(spriteBatch);
+                hero.renderHearts(spriteBatch);
+                if (fly != null) {
+                    fly.render(spriteBatch);
+                }
+                spriteBatch.end();
+            } else {
+                // Hero is dead, display Game Over
+                Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+                spriteBatch.begin();
+                font.setColor(Color.RED);
+                font.getData().setScale(3); // Adjust font size as needed
+                font.draw(spriteBatch, "Game Over", Gdx.graphics.getWidth() / 2 - 100, Gdx.graphics.getHeight() / 2);
+                spriteBatch.end();
+            }
+        } else {
+            handlePauseMenuInput();
+            Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+            spriteBatch.begin();
+            renderPauseMenu();
+            spriteBatch.end();
         }
     }
 
-    private void renderDialogueBox(String text) {
-        float boxWidth = 1200; // Width of the dialogue box
-        float boxHeight = 100; // Height of the dialogue box
-        float boxX = (1400 - boxWidth) / 2; // Centered horizontally on a 1400x1400 screen
-        float boxY = 50; // 50px from the bottom of the screen
+    private void handlePauseMenuInput() {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
+            selectedOption--;
+            if (selectedOption < 0) {
+                selectedOption = pauseMenuOptions.length - 1;
+            }
+        }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
+            selectedOption++;
+            if (selectedOption >= pauseMenuOptions.length) {
+                selectedOption = 0;
+            }
+        }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
+            String selected = pauseMenuOptions[selectedOption];
+            if (selected.equals("Resume")) {
+                isPaused = false;
+            } else if (selected.equals("Settings")) {
+                // Settings will be implemented later
+            } else if (selected.equals("Credits")) {
+                inCredits = true;
+            }
+        }
+        // Handle exiting credits screen
+        if (inCredits && Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+            inCredits = false;
+        }
+    }
 
-        // Draw the dialogue box background
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        shapeRenderer.setColor(new Color(0, 0, 0, 0.7f)); // Semi-transparent black
-        shapeRenderer.rect(boxX, boxY, boxWidth, boxHeight);
-        shapeRenderer.end();
-
-        // Draw the dialogue text
-        spriteBatch.begin();
-        font.draw(spriteBatch, text, boxX + 20, boxY + 70); // Text inside the box with padding
-        spriteBatch.end();
+    private void renderPauseMenu() {
+        if (inCredits) {
+            // Render credits placeholder
+            font.setColor(Color.WHITE);
+            font.draw(spriteBatch, "Credits\nGame developed by [Your Name]", 100, Gdx.graphics.getHeight() - 100);
+            font.draw(spriteBatch, "Press ESCAPE to return", 100, Gdx.graphics.getHeight() - 200);
+        } else {
+            // Render pause menu options
+            float menuX = Gdx.graphics.getWidth() / 2 - 50;
+            float menuY = Gdx.graphics.getHeight() / 2 + 50;
+            for (int i = 0; i < pauseMenuOptions.length; i++) {
+                if (i == selectedOption) {
+                    font.setColor(Color.YELLOW);
+                } else {
+                    font.setColor(Color.WHITE);
+                }
+                font.draw(spriteBatch, pauseMenuOptions[i], menuX, menuY - i * 30);
+            }
+        }
     }
 
     @Override
@@ -116,6 +185,8 @@ public class Main extends ApplicationAdapter {
         shapeRenderer.dispose();
         font.dispose();
         hero.dispose();
-        npc.dispose(); // Properly dispose NPC resources
+        if (fly != null) {
+            fly.dispose();
+        }
     }
 }
