@@ -51,7 +51,7 @@ public class Hero extends Character {
     private Animation<TextureRegion> currentAttackHeroAnimation;
 
     public Hero() {
-        super(37, 100, 3.5f, true);
+        super(37, 100, 1.5f, true); // avant c'était de 3.5 f (speed)
         this.maxHp = 40;
 
         // Load spritesheets
@@ -237,23 +237,23 @@ public class Hero extends Character {
         int remainder = hp % 4;     // Remaining HP for partial hearts
 
         float baseX = 20; // X offset
-        float baseY = Gdx.graphics.getHeight() - (40 * Main.SCALE_FACTOR); // Top-left corner
+        float baseY = Gdx.graphics.getHeight() - (40 * GameConstants.SCALE_FACTOR); // Top-left corner
 
         for (int i = 0; i < totalHearts; i++) {
-            float x = baseX + i * (20 * Main.SCALE_FACTOR);
+            float x = baseX + i * (20 * GameConstants.SCALE_FACTOR);
             float y = baseY;
 
             // Render heart background and border with scaling
-            spriteBatch.draw(heartBg, x, y, 17 * Main.SCALE_FACTOR, 17 * Main.SCALE_FACTOR);
-            spriteBatch.draw(heartBorder, x, y, 17 * Main.SCALE_FACTOR, 17 * Main.SCALE_FACTOR);
+            spriteBatch.draw(heartBg, x, y, 17 * GameConstants.SCALE_FACTOR, 17 * GameConstants.SCALE_FACTOR);
+            spriteBatch.draw(heartBorder, x, y, 17 * GameConstants.SCALE_FACTOR, 17 * GameConstants.SCALE_FACTOR);
 
             // Render heart state with scaling
             if (i < fullHearts) {
-                spriteBatch.draw(hearts[0], x, y, 17 * Main.SCALE_FACTOR, 17 * Main.SCALE_FACTOR);
+                spriteBatch.draw(hearts[0], x, y, 17 * GameConstants.SCALE_FACTOR, 17 * GameConstants.SCALE_FACTOR);
             } else if (i == fullHearts && remainder > 0) {
-                spriteBatch.draw(hearts[4 - remainder], x, y, 17 * Main.SCALE_FACTOR, 17 * Main.SCALE_FACTOR);
+                spriteBatch.draw(hearts[4 - remainder], x, y, 17 * GameConstants.SCALE_FACTOR, 17 * GameConstants.SCALE_FACTOR);
             } else {
-                spriteBatch.draw(hearts[4], x, y, 17 * Main.SCALE_FACTOR, 17 * Main.SCALE_FACTOR);
+                spriteBatch.draw(hearts[4], x, y, 17 * GameConstants.SCALE_FACTOR, 17 * GameConstants.SCALE_FACTOR);
             }
         }
     }
@@ -367,8 +367,8 @@ public class Hero extends Character {
                 currentHeroAttackFrame,
                 x,
                 y,
-                currentHeroAttackFrame.getRegionWidth() * Main.SCALE_FACTOR,
-                currentHeroAttackFrame.getRegionHeight() * Main.SCALE_FACTOR
+                currentHeroAttackFrame.getRegionWidth() * GameConstants.SCALE_FACTOR,
+                currentHeroAttackFrame.getRegionHeight() * GameConstants.SCALE_FACTOR
             );
 
             // Position the slash animation based on direction
@@ -386,7 +386,7 @@ public class Hero extends Character {
                     x,
                     y - 37 * 1.2f,
                     currentSlashFrame.getRegionWidth() * 1.9f,
-                    currentSlashFrame.getRegionHeight() * 1.9f
+                    currentSlashFrame.getRegionHeight() *1.9f
                 );
             } else if (currentAttackAnimation == slashLeft) {
                 spriteBatch.draw(
@@ -417,8 +417,8 @@ public class Hero extends Character {
                 currentFrame,
                 x,
                 y,
-                currentFrame.getRegionWidth() * Main.SCALE_FACTOR,
-                currentFrame.getRegionHeight() * Main.SCALE_FACTOR
+                currentFrame.getRegionWidth() * GameConstants.SCALE_FACTOR,
+                currentFrame.getRegionHeight() * GameConstants.SCALE_FACTOR
             );
         }
     }
