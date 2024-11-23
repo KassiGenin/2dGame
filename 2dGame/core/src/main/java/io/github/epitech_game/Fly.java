@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
+import java.util.List   ;
 
 public class Fly extends Enemy {
     private Texture flyUpSheet, flyDownSheet;
@@ -74,16 +75,13 @@ public class Fly extends Enemy {
 
     @Override
     public void move() {
-        // If the fly is dead, do not move
         if (!isAlive) {
             return;
         }
 
-        // Calculate direction towards the hero
         float deltaX = hero.getX() - this.x;
         float deltaY = hero.getY() - this.y;
 
-        // Normalize direction vector
         float distance = (float) Math.sqrt(deltaX * deltaX + deltaY * deltaY);
         if (distance == 0) {
             currentAnimation = flyUpAnimation;
@@ -93,7 +91,6 @@ public class Fly extends Enemy {
         float directionX = deltaX / distance;
         float directionY = deltaY / distance;
 
-        // Update position
         this.x += directionX * speed;
         this.y += directionY * speed;
 
@@ -192,10 +189,10 @@ public class Fly extends Enemy {
         return new Rectangle(x, y, width, height);
     }
 
-    @Override
-    public void update() {
+    public void update(List<Enemy> newEnemies) {
         super.update();
-        // Additional logic can be added here if needed
+        move();
+        attack();
     }
 
     @Override
@@ -220,6 +217,6 @@ public class Fly extends Enemy {
     }
 
     public boolean isDying() {
-         return super.isDying;
+        return super.isDying;
     }
 }

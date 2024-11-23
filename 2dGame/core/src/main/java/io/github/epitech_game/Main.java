@@ -12,12 +12,15 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.Rectangle;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 public class Main extends ApplicationAdapter {
     public static final float SCALE_FACTOR = 2.5f; // Scaling sprites to 2.5x their original size
 
     private Hero hero;
-    private Fly fly;
+    private ArrayList<Enemy> enemies;
     private SpriteBatch spriteBatch;
     private ShapeRenderer shapeRenderer;
     private OrthographicCamera camera;
@@ -36,8 +39,17 @@ public class Main extends ApplicationAdapter {
     public void create() {
         // Initialize characters
         hero = new Hero();
-        fly = new Fly(hero);
+        enemies = new ArrayList<>();
+
+        // Add initial fly
+        Fly fly = new Fly(hero);
         fly.setPosition(300, 300);
+        enemies.add(fly);
+
+        // Add forest boss
+        ForestBoss forestBoss = new ForestBoss(hero);
+        forestBoss.setPosition(500, 500);
+        enemies.add(forestBoss);
 
         // Initialize rendering tools
         spriteBatch = new SpriteBatch();
@@ -68,26 +80,50 @@ public class Main extends ApplicationAdapter {
                 hero.update();
                 hero.move();
 
-                if (fly != null) {
-                    fly.update();
-                    fly.move();
-                    fly.attack();
+                Rectangle attackBounds = hero.getAttackBounds();
+                Rectangle heroBounds = hero.getBounds();
 
-                    // Check for collision between hero's attack and fly
-                    Rectangle attackBounds = hero.getAttackBounds();
-                    if (attackBounds != null && fly.isAlive()) {
-                        Rectangle flyBounds = fly.getBounds();
-                        if (attackBounds.overlaps(flyBounds)) {
-                            fly.takeDamage(hero.getAp());
+                // Create a list to collect new enemies
+                List<Enemy> newEnemies = new ArrayList<>();
+
+                // Update and render enemies
+                Iterator<Enemy> enemyIterator = enemies.iterator();
+                while (enemyIterator.hasNext()) {
+                    Enemy enemy = enemyIterator.next();
+                    enemy.update(newEnemies); // Pass the newEnemies list
+
+                    // Check for collision between hero's attack and enemy
+                    if (attackBounds != null && enemy.isAlive()) {
+                        Rectangle enemyBounds = enemy.getBounds();
+                        if (attackBounds.overlaps(enemyBounds)) {
+                            enemy.takeDamage(hero.getAp());
                         }
                     }
 
-                    // Remove fly if it's dead and not dying (death animation finished)
-                    if (!fly.isAlive() && !fly.isDying()) {
-                        fly.dispose();
-                        fly = null; // Remove fly from the game
+                    // Check for collision between hero and enemy
+                    if (enemy.isAlive()) {
+                        Rectangle enemyBounds = enemy.getBounds();
+                        if (heroBounds.overlaps(enemyBounds)) {
+                            if (enemy instanceof ForestBoss) {
+                                ForestBoss forestBoss = (ForestBoss) enemy;
+                                if (forestBoss.isAttacking() && forestBoss.isInDamageFrame()) {
+                                    hero.takeDamage(forestBoss.getAp() * 2);
+                                }
+                            } else {
+                                hero.takeDamage(enemy.getAp());
+                            }
+                        }
+                    }
+
+                    // Remove enemy if it's dead and not dying
+                    if (!enemy.isAlive() && !enemy.isDying()) {
+                        enemy.dispose();
+                        enemyIterator.remove();
                     }
                 }
+
+                // Add any new enemies collected during update
+                enemies.addAll(newEnemies);
 
                 camera.update();
                 spriteBatch.setProjectionMatrix(camera.combined);
@@ -97,9 +133,12 @@ public class Main extends ApplicationAdapter {
                 spriteBatch.begin();
                 hero.render(spriteBatch);
                 hero.renderHearts(spriteBatch);
-                if (fly != null) {
-                    fly.render(spriteBatch);
+
+                // Render all enemies
+                for (Enemy enemy : enemies) {
+                    enemy.render(spriteBatch);
                 }
+
                 spriteBatch.end();
             } else {
                 // Hero is dead, display Game Over
@@ -108,7 +147,9 @@ public class Main extends ApplicationAdapter {
                 spriteBatch.begin();
                 font.setColor(Color.RED);
                 font.getData().setScale(3); // Adjust font size as needed
-                font.draw(spriteBatch, "Game Over", Gdx.graphics.getWidth() / 2 - 100, Gdx.graphics.getHeight() / 2);
+                font.draw(spriteBatch, "Game Over",
+                    Gdx.graphics.getWidth() / 2 - 100,
+                    Gdx.graphics.getHeight() / 2);
                 spriteBatch.end();
             }
         } else {
@@ -154,8 +195,10 @@ public class Main extends ApplicationAdapter {
         if (inCredits) {
             // Render credits placeholder
             font.setColor(Color.WHITE);
-            font.draw(spriteBatch, "Credits\nGame developed by [Your Name]", 100, Gdx.graphics.getHeight() - 100);
-            font.draw(spriteBatch, "Press ESCAPE to return", 100, Gdx.graphics.getHeight() - 200);
+            font.draw(spriteBatch, "Credits\nGame developed by [Your Name]",
+                100, Gdx.graphics.getHeight() - 100);
+            font.draw(spriteBatch, "Press ESCAPE to return",
+                100, Gdx.graphics.getHeight() - 200);
         } else {
             // Render pause menu options
             float menuX = Gdx.graphics.getWidth() / 2 - 50;
@@ -166,7 +209,8 @@ public class Main extends ApplicationAdapter {
                 } else {
                     font.setColor(Color.WHITE);
                 }
-                font.draw(spriteBatch, pauseMenuOptions[i], menuX, menuY - i * 30);
+                font.draw(spriteBatch, pauseMenuOptions[i],
+                    menuX, menuY - i * 30);
             }
         }
     }
@@ -175,7 +219,8 @@ public class Main extends ApplicationAdapter {
     public void resize(int width, int height) {
         // Handle resizing
         viewport.update(width, height);
-        camera.position.set(camera.viewportWidth / 2, camera.viewportHeight / 2, 0);
+        camera.position.set(camera.viewportWidth / 2,
+            camera.viewportHeight / 2, 0);
     }
 
     @Override
@@ -185,8 +230,8 @@ public class Main extends ApplicationAdapter {
         shapeRenderer.dispose();
         font.dispose();
         hero.dispose();
-        if (fly != null) {
-            fly.dispose();
+        for (Enemy enemy : enemies) {
+            enemy.dispose();
         }
     }
 }

@@ -4,6 +4,9 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import java.util.List;
 
 public abstract class Enemy extends Character {
     private boolean isRanged;
@@ -32,6 +35,16 @@ public abstract class Enemy extends Character {
         }
     }
 
+    public boolean isAlive() {
+        return isAlive;
+    }
+
+    public boolean isDying() {
+        return isDying;
+    }
+
+    public abstract void update (List<Enemy> newEnemies);
+
     @Override
     public void update() {
         super.update();
@@ -42,7 +55,6 @@ public abstract class Enemy extends Character {
                 invincibleTimer = 0f;
             }
         }
-
 
         if (isDying) {
             deathStateTime += Gdx.graphics.getDeltaTime();
@@ -58,6 +70,11 @@ public abstract class Enemy extends Character {
 
     @Override
     public abstract void attack();
+
+    // Add abstract methods for rendering and getting bounds
+    public abstract void render(SpriteBatch spriteBatch);
+
+    public abstract Rectangle getBounds();
 
     @Override
     public void handleDeath() {

@@ -8,7 +8,6 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 
-
 public class Hero extends Character {
 
     protected int maxHp;
@@ -28,7 +27,6 @@ public class Hero extends Character {
     private float stateTime;
     private boolean isInvincible = false;
     private float invincibleTimer = 0f;
-
 
     // Animation-related fields
     private final Texture spriteSheet;
@@ -101,10 +99,10 @@ public class Hero extends Character {
         dashLeft = createAnimation(leftDashFrames, 0, 0, 6, DASH_DURATION);
         dashUp = createAnimation(upDashFrames, 0, 0, 7, DASH_DURATION);
         dashRight = createAnimation(rightDashFrames, 0, 0, 6, DASH_DURATION);
-        slashDown = createAnimation(TextureRegion.split(slashDownSheet, 54, 37), false, false);
-        slashUp = createAnimation(TextureRegion.split(slashUpSheet, 54, 37), false, true);
-        slashRight = createAnimation(TextureRegion.split(slashRightSheet, 66, 27), true, false);
-        slashLeft = createAnimation(TextureRegion.split(slashLeftSheet, 65, 27), true, false);
+        slashDown = createAttackAnimation(TextureRegion.split(slashDownSheet, 54, 37), false, false);
+        slashUp = createAttackAnimation(TextureRegion.split(slashUpSheet, 54, 37), false, true);
+        slashRight = createAttackAnimation(TextureRegion.split(slashRightSheet, 65, 27), true, false);
+        slashLeft = createAttackAnimation(TextureRegion.split(slashLeftSheet, 65, 27), true, false);
 
         // Create attack animations
         attackUpAnimation = new Animation<>(0.1f, attackUpFrames[0]);
@@ -134,17 +132,18 @@ public class Hero extends Character {
             }
         }
     }
+
     @Override
     public void takeDamage(int damage) {
-        if (this.isHittable && !isInvincible) {
-            this.hp -= damage;
-            if (this.hp <= 0) {
-                this.isAlive = false;
+        if (!isInvincible) {
+            hp -= damage;
+            if (hp <= 0) {
+                handleDeath();
+            } else {
+                setInvincible(2f); // Set invincibility duration to 2 seconds
             }
-            setInvincible(0.5f);
         }
     }
-
 
     public void setInvincible(float duration) {
         isInvincible = true;
@@ -158,11 +157,9 @@ public class Hero extends Character {
         this.isHittable = false;
     }
 
-
     public boolean isDead() {
         return isDead;
     }
-
 
     public Rectangle getAttackBounds() {
         if (!isAttacking) {
@@ -191,31 +188,37 @@ public class Hero extends Character {
         } else if (currentAttackAnimation == slashLeft) {
             attackX = x - 66 * scale;
             attackY = y;
-            attackWidth = currentSlashFrame.getRegionWidth() * scale;
-            attackHeight = currentSlashFrame.getRegionHeight() * scale;
+            attackWidth = currentSlashFrame.getRegionWidth() * 1.2f;
+            attackHeight = currentSlashFrame.getRegionHeight() * 1.2f;
         } else if (currentAttackAnimation == slashRight) {
             attackX = x + 32 * scale;
             attackY = y;
-            attackWidth = currentSlashFrame.getRegionWidth() * scale;
-            attackHeight = currentSlashFrame.getRegionHeight() * scale;
+            attackWidth = currentSlashFrame.getRegionWidth() * 1.5f;
+            attackHeight = currentSlashFrame.getRegionHeight() * 1.5f;
         }
 
         return new Rectangle(attackX, attackY, attackWidth, attackHeight);
+    }
+
+    public Rectangle getBounds() {
+        float width = 32 * Main.SCALE_FACTOR;
+        float height = 32 * Main.SCALE_FACTOR;
+        return new Rectangle(x, y, width, height);
     }
 
     public boolean isAttacking() {
         return isAttacking;
     }
 
-    private Animation<TextureRegion> createAnimation(TextureRegion[][] frames, boolean horizontal, boolean reverseVertical) {
+    private Animation<TextureRegion> createAttackAnimation(TextureRegion[][] frames, boolean horizontal, boolean reverseVertical) {
         int frameCount = horizontal ? frames[0].length : frames.length;
         TextureRegion[] animationFrames = new TextureRegion[frameCount];
 
         for (int i = 0; i < frameCount; i++) {
             if (horizontal) {
-                animationFrames[i] = frames[0][horizontal ? i : frameCount - 1 - i]; // Left-to-right or right-to-left
+                animationFrames[i] = frames[0][i];
             } else {
-                animationFrames[i] = frames[reverseVertical ? frameCount - 1 - i : i][0]; // Top-to-bottom or bottom-to-top
+                animationFrames[i] = frames[i][0];
             }
         }
 
@@ -400,7 +403,7 @@ public class Hero extends Character {
                 spriteBatch.draw(
                     currentSlashFrame,
                     x + 32 * 1.5f,
-                    y+10,
+                    y + 10,
                     currentSlashFrame.getRegionWidth() * 1.7f,
                     currentSlashFrame.getRegionHeight() * 1.7f
                 );
@@ -452,7 +455,6 @@ public class Hero extends Character {
             }
         }
     }
-
 
     public void dispose() {
         if (spriteSheet != null) spriteSheet.dispose();
