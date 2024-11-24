@@ -9,8 +9,8 @@ public class NPC1 extends NPC {
     public NPC1() {
         super(
             "Elder Willow",
-            new Array<String>(new String[] {"Greetings, traveler.", "The forest holds many secrets.", "Stay vigilant on your journey."}),
-            150,
+            new Array<String>(new String[] {"Greetings.", "The forest holds many secrets.", "An ancient warrior lives here.","The legend says the one to defeat him ","would be granted great strength."}),
+            50,
             "NPC1.png"
         );
     }

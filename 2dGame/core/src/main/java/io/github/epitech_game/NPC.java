@@ -21,7 +21,7 @@ public abstract class NPC extends Character {
     protected int dialogueIndex = -1;
     protected boolean inZone = false;
 
-    protected static final float SCALE_FACTOR = 2.5f;
+    protected static final float SCALE_FACTOR = 1f;
 
     public NPC(String name, Array<String> dialogue, Integer zone, String png) {
         super(0, 0, 0, false);

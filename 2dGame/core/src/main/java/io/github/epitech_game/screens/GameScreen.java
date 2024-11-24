@@ -18,6 +18,9 @@ import io.github.epitech_game.Hero;
 import io.github.epitech_game.Enemy;
 import io.github.epitech_game.Fly;
 import io.github.epitech_game.Wizard;
+import io.github.epitech_game.NPC2;
+import io.github.epitech_game.NPC1;
+import io.github.epitech_game.NPC;
 import io.github.epitech_game.Main;
 import io.github.epitech_game.SpawnDirection;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
@@ -33,11 +36,13 @@ public class GameScreen implements Screen {
 
     private Hero hero;
     private ArrayList<Enemy> enemies;
+    private ArrayList<NPC> npcs;
     private SpriteBatch spriteBatch;
     private OrthographicCamera camera;
     private OrthographicCamera hudCamera;
     private Viewport viewport;
     private BitmapFont font;
+    private float stateTime ;
 
     private TiledMap map;
     private OrthogonalTiledMapRenderer mapRenderer;
@@ -82,6 +87,8 @@ public class GameScreen implements Screen {
             return;
         }
 
+        stateTime = 0f;
+
         // Initialize camera and viewport
         camera = new OrthographicCamera();
         viewport = new FitViewport(mapWidth, mapHeight, camera);
@@ -123,20 +130,32 @@ public class GameScreen implements Screen {
         // Initialize enemies
         try {
             enemies = new ArrayList<>();
-            Fly fly = new Fly(hero);
-            fly.setPosition(300, 300);
-            enemies.add(fly);
+
             Gdx.app.log("GameScreen", "Enemy1 (Fly) initialized at (300,300)");
 
-            Wizard forestBoss = new Wizard(hero);
-            forestBoss.setPosition(150, 100);
-            enemies.add(forestBoss);
-            Gdx.app.log("GameScreen", "Enemy2 (Wizard) initialized at (500,500)");
         } catch (Exception e) {
             Gdx.app.error("GameScreen", "Failed to initialize enemies", e);
             Gdx.app.exit();
             return;
         }
+
+        try {
+            npcs = new ArrayList<>();
+            NPC2 npc2 = new NPC2();
+            NPC1 npc1 = new NPC1();
+            npc2.setPosition(170, 285);
+            npc1.setPosition(340, 235);
+            npcs.add(npc2);
+            npcs.add(npc1);
+            Gdx.app.log("GameScreen", "Enemy1 (Fly) initialized at (300,300)");
+
+        } catch (Exception e) {
+            Gdx.app.error("GameScreen", "Failed to initialize enemies", e);
+            Gdx.app.exit();
+            return;
+        }
+
+
 
         // Initialize rendering tools
         spriteBatch = new SpriteBatch();
@@ -171,6 +190,8 @@ public class GameScreen implements Screen {
 
     @Override
     public void render(float delta) {
+        float deltaTime = Gdx.graphics.getDeltaTime();
+        stateTime += Gdx.graphics.getDeltaTime();
         // Handle pause input
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
             isPaused = !isPaused;
@@ -198,6 +219,19 @@ public class GameScreen implements Screen {
 
         for (Enemy enemy : enemies) {
             enemy.render(spriteBatch);
+        }
+
+        for (NPC npc : npcs) {
+            npc.checkHeroInZone(hero);
+        }
+        for (NPC npc : npcs) {
+            npc.render(spriteBatch, stateTime);
+            String dialogueLine = npc.updateDialogue(deltaTime);
+            if (dialogueLine != null) {
+                font.getData().setScale(0.8f); // Adjust scale as needed
+                font.draw(spriteBatch, npc.getName() + ": " + dialogueLine,
+                    50, 50); // Adjust Y position as needed
+            }
         }
 
         spriteBatch.end();

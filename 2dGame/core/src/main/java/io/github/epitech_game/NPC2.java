@@ -9,11 +9,12 @@ public class NPC2 extends NPC {
     public NPC2() {
         super(
             "Royal guard",
-            new Array<String>(new String[] {"bla bla bla too weak", "aura kill you", "go see the elder"}),
-            150,
+            new Array<String>(new String[] {"Don't go there, the dark knight would kill you.", "He took the place of the king months ago.", "Nobody is strong enough to face him.", "A simple gaze would have reason of you.", "If you want to disturb someone, go see the elder"}),
+            70,
             "NPC2.png"
         );
     }
+    // faire le changement de dialogue dans le main if hero.getmaxhp> vjebvje truc
 
     @Override
     protected Animation<TextureRegion> createIdleAnimation() {
