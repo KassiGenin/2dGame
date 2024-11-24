@@ -1,5 +1,8 @@
 package io.github.epitech_game;
 
+import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+
 public abstract class Character {
     protected int hp;
     protected int ap;
@@ -32,6 +35,14 @@ public abstract class Character {
         return y;
     }
 
+    public Animation<TextureRegion> createAnimation(TextureRegion[][] frames, int row, int startCol, int endCol) {
+        TextureRegion[] animationFrames = new TextureRegion[endCol - startCol + 1];
+        for (int i = startCol; i <= endCol; i++) {
+            animationFrames[i - startCol] = frames[row][i];
+        }
+        return new Animation<>(0.1f, animationFrames);
+    }
+
     public abstract void move();
 
     public abstract void attack();
@@ -43,6 +54,19 @@ public abstract class Character {
                 this.isAlive = false;
             }
         }
+    }
+
+    public void update() {
+        if (!isAlive) {
+            handleDeath();
+        }
+    }
+
+    public void handleDeath() {
+        this.hp = 0;
+        this.ap = 0;
+        this.speed = 0;
+        this.isHittable = false;
     }
 
     public int getHp() {
@@ -57,11 +81,11 @@ public abstract class Character {
         return this.speed;
     }
 
-    public Boolean getIsHittable() {
+    public boolean getIsHittable() {
         return this.isHittable;
     }
 
-    public Boolean getIsAlive() {
+    public boolean getIsAlive() {
         return this.isAlive;
     }
 

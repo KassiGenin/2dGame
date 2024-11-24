@@ -31,8 +31,11 @@ public class Lwjgl3Launcher {
         configuration.setTitle("Z-like");
         configuration.useVsync(true);
         configuration.setForegroundFPS(60); // Limit FPS to 60
-        configuration.setWindowedMode(640, 480); // Set window size
+        configuration.setWindowedMode(1200, 1200); // Set window size
+        configuration.setWindowSizeLimits(1200, 1200, 1200, 1200);
 
         return configuration;
     }
 }
+
+
