@@ -24,7 +24,7 @@ public class Wizard extends Enemy {
     private float attackY;
 
     public Wizard(Hero hero) {
-        super(100, 10, 0f, true, true, false, 1000);
+        super(400, 10, 0f, true, true, false, 1000);
         this.hero = hero;
         wizardTexture = new Texture("wizard.png"); // Ensure "wizard.png" exists in assets
         attackTexture = new Texture("mageAttack.png"); // Ensure "mageAttack.png" exists in assets
@@ -118,10 +118,21 @@ public class Wizard extends Enemy {
         return distance <= this.range;
     }
 
+    public boolean isInvincible() {
+        return isInvincible;
+    }
     @Override
     public void render(SpriteBatch spriteBatch) {
         if (!isAlive && !isDying) {
             return;
+        }
+
+        if (isInvincible()) {;
+            spriteBatch.setColor(1, 1, 1, 0.5f);
+
+
+        } else {
+            spriteBatch.setColor(1, 1, 1, 1);
         }
 
         if (isDying) {
