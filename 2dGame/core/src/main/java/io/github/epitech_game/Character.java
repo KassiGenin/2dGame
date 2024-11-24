@@ -67,6 +67,7 @@ public abstract class Character {
         this.ap = 0;
         this.speed = 0;
         this.isHittable = false;
+
     }
 
     public int getHp() {

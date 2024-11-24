@@ -129,7 +129,7 @@ public class GameScreen implements Screen {
             Gdx.app.log("GameScreen", "Enemy1 (Fly) initialized at (300,300)");
 
             ForestBoss forestBoss = new ForestBoss(hero);
-            forestBoss.setPosition(500, 500);
+            forestBoss.setPosition(150, 300);
             enemies.add(forestBoss);
             Gdx.app.log("GameScreen", "Enemy2 (ForestBoss) initialized at (500,500)");
         } catch (Exception e) {

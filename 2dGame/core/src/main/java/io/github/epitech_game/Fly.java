@@ -19,7 +19,7 @@ public class Fly extends Enemy {
     private boolean flipSprite = false;
 
     public Fly(Hero hero) {
-        super(200, 2, 1.5f, true, false, false, 25);
+        super(200, 2, 1f, true, false, false, 25);
         this.hero = hero;
         this.range = 25;
         this.stateTime = 0f;

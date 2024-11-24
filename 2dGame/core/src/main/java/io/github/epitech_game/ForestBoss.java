@@ -32,7 +32,7 @@ public class ForestBoss extends Boss {
     // Movement parameters
     private float moveTimer = 0f;
     private float MOVE_DURATION = 3f; // Move for 3 seconds
-    private float PAUSE_DURATION = 1f; // Pause for 1 second
+    private float PAUSE_DURATION = 2f; // Pause for 1 second
     private float pauseTimer = 0f;
     private boolean isMoving = true;
 
@@ -46,7 +46,7 @@ public class ForestBoss extends Boss {
 
 
     public ForestBoss(Hero hero) {
-        super(2000, false, 50); // Assuming the ForestBoss is not ranged  // before 2000
+        super(200, false, 50); // Assuming the ForestBoss is not ranged  // before 2000
         this.hero = hero;
 
         // Load textures
@@ -222,7 +222,7 @@ public class ForestBoss extends Boss {
         } else {
             // Decide next action
             float distanceToHero = (float) Math.sqrt((hero.getX() - x) * (hero.getX() - x) + (hero.getY() - y) * (hero.getY() - y));
-            if (distanceToHero <= ATTACK_RANGE) {
+            if (distanceToHero <= ATTACK_RANGE-50) {
                 // Hero is in range, start attacking
                 isAttacking = true;
                 actionTimer = 0f;
@@ -275,11 +275,11 @@ public class ForestBoss extends Boss {
 
     private void spawnFlies(List<Enemy> newEnemies) {
         Fly fly1 = new Fly(hero);
-        fly1.setPosition(0, Gdx.graphics.getHeight() - 50);
+        fly1.setPosition(0, 400);
         newEnemies.add(fly1);
 
         Fly fly2 = new Fly(hero);
-        fly2.setPosition(Gdx.graphics.getWidth() - 50, Gdx.graphics.getHeight() - 50);
+        fly2.setPosition(400, 400);
         newEnemies.add(fly2);
     }
     public void render(SpriteBatch spriteBatch) {
@@ -346,6 +346,11 @@ public class ForestBoss extends Boss {
         if (!isAlive) {
             return;
         }
+        if (isDying) {
+            hero.setMaxHp(60);
+            return;
+        }
+
 
         move();
         attack(newEnemies);

@@ -16,7 +16,7 @@ public class Hero extends Character {
     private float dashCooldownTimer = 0f;
     private final float DASH_COOLDOWN = 1f; // Cooldown time for dash
     private final float DASH_DURATION = 0.5f; // Duration of the dash
-    private final float DASH_DISTANCE = 200f; // Distance covered by the dash
+    private final float DASH_DISTANCE = 85f; // Distance covered by the dash
     private float dashTimer = 0f; // Timer for ongoing dash
     private boolean isDashing = false; // Whether the hero is dashing
     private float dashDirectionX = 0f, dashDirectionY = 0f; // Direction of the dash
@@ -53,7 +53,7 @@ public class Hero extends Character {
     private TiledMapTileLayer collisionLayer;
 
     public Hero(TiledMapTileLayer collisionLayer) {
-        super(120,100, 2.5f, true);  // speed before 3.5 f
+        super(120,100, 1.5f, true);  // speed before 3.5 f
         this.maxHp = 120;
         this.collisionLayer = collisionLayer;
 
@@ -141,7 +141,7 @@ public class Hero extends Character {
 
     @Override
     public void takeDamage(int damage) {
-        if (!isInvincible) {
+        if (!isInvincible && !isDashing) {
             hp -= damage;
             if (hp <= 0) {
                 handleDeath();
@@ -167,7 +167,7 @@ public class Hero extends Character {
         return isDead;
     }
 
-    public Rectangle getAttackBounds() {
+    public Rectangle getAttackBounds() { //apres les slash
         if (!isAttacking) {
             return null;
         }
@@ -184,26 +184,30 @@ public class Hero extends Character {
         if (currentAttackAnimation == slashUp) {
             attackX = x;
             attackY = y + 32 * scale;
-            attackWidth = currentSlashFrame.getRegionWidth() * 1.2f;
-            attackHeight = currentSlashFrame.getRegionHeight() * 1.2f;
+            attackWidth = currentSlashFrame.getRegionWidth() * 1f;
+            attackHeight = currentSlashFrame.getRegionHeight() * 1f;
         } else if (currentAttackAnimation == slashDown) {
             attackX = x;
             attackY = y - 37 * scale;
-            attackWidth = currentSlashFrame.getRegionWidth() * scale;
-            attackHeight = currentSlashFrame.getRegionHeight() * scale;
+            attackWidth = currentSlashFrame.getRegionWidth() * 0.6f;
+            attackHeight = currentSlashFrame.getRegionHeight() * 0.6f;
         } else if (currentAttackAnimation == slashLeft) {
             attackX = x - 66 * scale;
             attackY = y;
-            attackWidth = currentSlashFrame.getRegionWidth() * 1.2f;
-            attackHeight = currentSlashFrame.getRegionHeight() * 1.2f;
+            attackWidth = currentSlashFrame.getRegionWidth() * 0.9f;
+            attackHeight = currentSlashFrame.getRegionHeight() * 0.9f;
         } else if (currentAttackAnimation == slashRight) {
             attackX = x + 32 * scale;
             attackY = y;
-            attackWidth = currentSlashFrame.getRegionWidth() * 1.5f;
-            attackHeight = currentSlashFrame.getRegionHeight() * 1.5f;
+            attackWidth = currentSlashFrame.getRegionWidth() * 0.6f;
+            attackHeight = currentSlashFrame.getRegionHeight() * 0.6f;
         }
 
         return new Rectangle(attackX, attackY, attackWidth, attackHeight);
+    }
+
+    public void setMaxHp(int maxHp) {
+        this.maxHp = maxHp;
     }
 
     public Rectangle getBounds() {
@@ -410,20 +414,22 @@ public class Hero extends Character {
             );
 
             // Define scaling factors
-            float slashScale = GameConstants.SCALE_FACTOR*0.8f; // a modifier apres
+            float slashScale = GameConstants.SCALE_FACTOR*0.7f; // a modifier apres
             float offsetX = 0;
             float offsetY = 0;
 
             // Calculate offsets based on direction
             if (currentAttackAnimation == slashUp) {
-                offsetY = 32 * GameConstants.SCALE_FACTOR;
+                offsetY = 26 * GameConstants.SCALE_FACTOR;
             } else if (currentAttackAnimation == slashDown) {
-                offsetY = -37 * GameConstants.SCALE_FACTOR;
+                offsetY = -30 * GameConstants.SCALE_FACTOR;
             } else if (currentAttackAnimation == slashLeft) {
-                offsetX = -66 * GameConstants.SCALE_FACTOR;
+                offsetX = -35 * GameConstants.SCALE_FACTOR;
+                offsetY = 5 * GameConstants.SCALE_FACTOR;
+
             } else if (currentAttackAnimation == slashRight) {
-                offsetX = 32 * GameConstants.SCALE_FACTOR;
-                offsetY = 10 * GameConstants.SCALE_FACTOR; // Adjust if necessary
+                offsetX = 22 * GameConstants.SCALE_FACTOR;
+                offsetY = 1 * GameConstants.SCALE_FACTOR; // Adjust if necessary
             }
 
             // Draw the slash animation

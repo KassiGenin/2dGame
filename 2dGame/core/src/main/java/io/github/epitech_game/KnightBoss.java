@@ -177,7 +177,7 @@ public class KnightBoss extends Boss {
         float deltaTime = Gdx.graphics.getDeltaTime();
 
         if (isAttacking) {
-            // Continue attack animation
+
             actionTimer += deltaTime;
             stateTime += deltaTime;
             if (currentAttackAnimation.isAnimationFinished(stateTime)) {
@@ -200,14 +200,14 @@ public class KnightBoss extends Boss {
         } else {
             // Decide next action
             float distanceToHero = (float) Math.sqrt((hero.getX() - x) * (hero.getX() - x) + (hero.getY() - y) * (hero.getY() - y));
-            if (distanceToHero <= ATTACK_RANGE) {
+            if (distanceToHero <= ATTACK_RANGE-50) {
                 // Hero is in range, start attacking
                 isAttacking = true;
                 actionTimer = 0f;
                 stateTime = 0f;
                 determineAttackAnimation();
             } else {
-                // Use capacity
+
                 isUsingCapacity = true;
                 actionTimer = 0f;
             }
@@ -253,11 +253,11 @@ public class KnightBoss extends Boss {
 
     private void spawnFlies(List<Enemy> newEnemies) {
         Wizard wizard1 = new Wizard(hero);
-        wizard1.setPosition((float) (Math.random() * 1000 + 100), (float) (Math.random() * 1000 + 100));
+        wizard1.setPosition((float) (Math.random() * 300 + 10), (float) (Math.random() * 300 + 10));
         newEnemies.add(wizard1);
 
         Wizard wizard2 = new Wizard(hero);
-        wizard2.setPosition((float) (Math.random() * 1000 + 100), (float) (Math.random() * 1000 + 100));
+        wizard2.setPosition((float) (Math.random() * 300 + 10), (float) (Math.random() * 300 + 10));
         newEnemies.add(wizard2);
     }
     public void render(SpriteBatch spriteBatch) {
@@ -272,8 +272,8 @@ public class KnightBoss extends Boss {
                     currentFrame,
                     x,
                     y,
-                    currentFrame.getRegionWidth() * 6f,
-                    currentFrame.getRegionHeight() * 6f
+                    currentFrame.getRegionWidth() * 1f,
+                    currentFrame.getRegionHeight() * 1f
                 );
             } return;
         }
@@ -304,8 +304,8 @@ public class KnightBoss extends Boss {
             currentFrame,
             x,
             y,
-            currentFrame.getRegionWidth() * 2f,
-            currentFrame.getRegionHeight() * 2f
+            currentFrame.getRegionWidth() * 1,
+            currentFrame.getRegionHeight() * 1
         );
     }
     @Override
@@ -338,8 +338,8 @@ public class KnightBoss extends Boss {
         } else {
             currentFrame = currentAnimation.getKeyFrame(stateTime, true);
         }
-        float width = currentFrame.getRegionWidth() * 2f;
-        float height = currentFrame.getRegionHeight() * 2f;
+        float width = currentFrame.getRegionWidth() * 0.8f;
+        float height = currentFrame.getRegionHeight() * 0.8f;
         return new Rectangle(x, y, width, height);
     }
 
