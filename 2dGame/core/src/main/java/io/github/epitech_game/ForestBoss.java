@@ -31,8 +31,8 @@ public class ForestBoss extends Boss {
 
     // Movement parameters
     private float moveTimer = 0f;
-    private final float MOVE_DURATION = 3f; // Move for 3 seconds
-    private final float PAUSE_DURATION = 1f; // Pause for 1 second
+    private float MOVE_DURATION = 3f; // Move for 3 seconds
+    private float PAUSE_DURATION = 1f; // Pause for 1 second
     private float pauseTimer = 0f;
     private boolean isMoving = true;
 
@@ -46,7 +46,7 @@ public class ForestBoss extends Boss {
 
 
     public ForestBoss(Hero hero) {
-        super(200, false, 50); // Assuming the ForestBoss is not ranged
+        super(2000, false, 50); // Assuming the ForestBoss is not ranged  // before 2000
         this.hero = hero;
 
         // Load textures
@@ -77,7 +77,7 @@ public class ForestBoss extends Boss {
 
     private Animation<TextureRegion> createAttackAnimation(int startRow, boolean flip) {
         int frameWidth = 126;
-        int frameHeight = 137;
+        int frameHeight = 132;
         int totalFrames = 12; // 7 frames from first line + 5 frames from second line (sprites 2-6)
 
         TextureRegion[] frames = new TextureRegion[totalFrames];
@@ -90,7 +90,9 @@ public class ForestBoss extends Boss {
                 startRow * frameHeight,
                 frameWidth - 2, frameHeight - 10); // Adjusted dimensions
             frame.setRegionX(frame.getRegionX() + 2); // Skip 2 pixels from left
-            frame.setRegionY(frame.getRegionY() + 2); // Skip 2 pixels from top
+            frame.setRegionY(frame.getRegionY() + 18);
+
+
 
             if (!flip) {
                 frame.flip(true, false);
@@ -105,7 +107,7 @@ public class ForestBoss extends Boss {
                 (startRow + 1) * frameHeight,
                 frameWidth - 2, frameHeight - 8); // Adjusted dimensions
             frame.setRegionX(frame.getRegionX() + 2); // Skip 2 pixels from left
-            frame.setRegionY(frame.getRegionY() + 8); // Skip 8 pixels from top
+            frame.setRegionY(frame.getRegionY() + 14); // Skip 8 pixels from top
 
             if (!flip) {
                 frame.flip(true, false);
@@ -268,6 +270,10 @@ public class ForestBoss extends Boss {
         return this.isAlive;
     }
 
+    public boolean isInvincible() {
+        return isInvincible;
+    }
+
     private void spawnFlies(List<Enemy> newEnemies) {
         Fly fly1 = new Fly(hero);
         fly1.setPosition(0, Gdx.graphics.getHeight() - 50);
@@ -278,14 +284,35 @@ public class ForestBoss extends Boss {
         newEnemies.add(fly2);
     }
     public void render(SpriteBatch spriteBatch) {
-        if (!isAlive) {
+        if (!isAlive && !isDying) {
             return;
         }
+        if (isDying) {
+
+            if (!deathAnimation.isAnimationFinished(deathStateTime)) {
+                TextureRegion currentFrame = deathAnimation.getKeyFrame(deathStateTime, false);
+                spriteBatch.draw(
+                    currentFrame,
+                    x,
+                    y,
+                    currentFrame.getRegionWidth() * 0.8f,
+                    currentFrame.getRegionHeight() * 0.8f
+                );
+            } return;
+        }
+        if (isInvincible()) {;
+            spriteBatch.setColor(1, 1, 1, 0.5f);
+
+
+        } else {
+            spriteBatch.setColor(1, 1, 1, 1);
+        }
+
 
         TextureRegion currentFrame;
 
         if (isAttacking) {
-            currentFrame = currentAttackAnimation.getKeyFrame(stateTime, true);
+            currentFrame = currentAttackAnimation.getKeyFrame(stateTime, false);
         } else {
             currentFrame = currentAnimation.getKeyFrame(stateTime, true);
         }
@@ -300,10 +327,16 @@ public class ForestBoss extends Boss {
             currentFrame,
             x,
             y,
-            currentFrame.getRegionWidth() * 2f,
-            currentFrame.getRegionHeight() * 2f
+            currentFrame.getRegionWidth() * 0.8f,
+            currentFrame.getRegionHeight() * 0.8f
         );
     }
+    @Override
+    public void handleDeath() {
+        super.handleDeath();
+    }
+
+
 
     @Override
     public void update(List<Enemy> newEnemies) {
@@ -320,12 +353,12 @@ public class ForestBoss extends Boss {
     public Rectangle getBounds() {
         TextureRegion currentFrame;
         if (isAttacking) {
-            currentFrame = currentAttackAnimation.getKeyFrame(stateTime, true);
+            currentFrame = currentAttackAnimation.getKeyFrame(stateTime, false);
         } else {
             currentFrame = currentAnimation.getKeyFrame(stateTime, true);
         }
-        float width = currentFrame.getRegionWidth() * 2f;
-        float height = currentFrame.getRegionHeight() * 2f;
+        float width = currentFrame.getRegionWidth() * 0.8f;
+        float height = currentFrame.getRegionHeight() * 0.8f;
         return new Rectangle(x, y, width, height);
     }
 
@@ -333,6 +366,7 @@ public class ForestBoss extends Boss {
     public boolean isAttacking() {
         return isAttacking;
     }
+
 
     public boolean isInDamageFrame() {
         if (!isAttacking) {
@@ -346,16 +380,6 @@ public class ForestBoss extends Boss {
         return isDying;
     }
 
-    @Override
-    public void takeDamage(int damage) {
-        if (this.isHittable && !isInvincible) {
-            this.hp -= damage;
-            if (this.hp <= 0) {
-                handleDeath();
-            }
-            setInvincible(0.5f); // Optional invincibility duration after hit
-        }
-    }
 
     @Override
     public void dispose() {
@@ -365,3 +389,5 @@ public class ForestBoss extends Boss {
         if (attackTexture != null) attackTexture.dispose();
     }
 }
+
+
