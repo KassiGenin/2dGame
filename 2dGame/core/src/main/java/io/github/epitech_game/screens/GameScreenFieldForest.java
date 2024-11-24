@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class GameScreen2 implements Screen {
+public class GameScreenFieldForest implements Screen {
 
     private Main game;
     private SpawnDirection spawnDirection;
@@ -51,7 +51,7 @@ public class GameScreen2 implements Screen {
 
     private TiledMapTileLayer collisionLayer;
 
-    public GameScreen2(Main game, SpawnDirection spawnDirection) {
+    public GameScreenFieldForest(Main game, SpawnDirection spawnDirection) {
         this.game = game;
         this.spawnDirection = spawnDirection;
         initialize();
@@ -308,7 +308,7 @@ public class GameScreen2 implements Screen {
             // Add more cases if transitioning to other screens
             default:
                 // For simplicity, stay on the same screen or handle other transitions
-                game.setScreen(new GameScreen2(game, direction));
+                game.setScreen(new GameScreenFieldForest(game, direction));
                 break;
         }
     }

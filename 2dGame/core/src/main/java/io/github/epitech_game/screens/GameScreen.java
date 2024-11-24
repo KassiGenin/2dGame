@@ -16,8 +16,6 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import io.github.epitech_game.Hero;
 import io.github.epitech_game.Enemy;
-import io.github.epitech_game.Fly;
-import io.github.epitech_game.Wizard;
 import io.github.epitech_game.NPC2;
 import io.github.epitech_game.NPC1;
 import io.github.epitech_game.NPC;
@@ -343,7 +341,7 @@ public class GameScreen implements Screen {
         switch (direction) {
             case FROM_TOP:
                 // Transition to GameScreen2
-                game.setScreen(new GameScreen2(game, SpawnDirection.FROM_BOTTOM));
+                game.setScreen(new GameScreenFieldForest(game, SpawnDirection.FROM_BOTTOM));
                 break;
             // Add more cases if transitioning to other screens
             default:
