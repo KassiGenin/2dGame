@@ -47,9 +47,9 @@ public class Main extends ApplicationAdapter {
         enemies.add(fly);
 
         // Add forest boss
-        ForestBoss forestBoss = new ForestBoss(hero);
-        forestBoss.setPosition(500, 500);
-        enemies.add(forestBoss);
+        KnightBoss knightBoss = new KnightBoss(hero);
+        knightBoss.setPosition(500, 500);
+        enemies.add(knightBoss);
 
         // Initialize rendering tools
         spriteBatch = new SpriteBatch();
