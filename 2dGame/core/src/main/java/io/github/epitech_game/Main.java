@@ -15,12 +15,15 @@ import com.badlogic.gdx.math.Rectangle;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import com.badlogic.gdx.utils.Array;
+
 
 public class Main extends ApplicationAdapter {
     public static final float SCALE_FACTOR = 2.5f; // Scaling sprites to 2.5x their original size
 
     private Hero hero;
     private ArrayList<Enemy> enemies;
+    private Array<NPC> npcs;
     private SpriteBatch spriteBatch;
     private ShapeRenderer shapeRenderer;
     private OrthographicCamera camera;
@@ -40,13 +43,15 @@ public class Main extends ApplicationAdapter {
         // Initialize characters
         hero = new Hero();
         enemies = new ArrayList<>();
+        npcs = new Array<>();
+
+
+       NPC2 npc2 = new NPC2();
+       npc2.setPosition(100, 100);
+       npcs.add(npc2);
 
 
 
-
-        Wizard wizard = new Wizard(hero);
-        wizard.setPosition(500, 500);
-        enemies.add(wizard);
 
         // Initialize rendering tools
         spriteBatch = new SpriteBatch();
@@ -66,6 +71,8 @@ public class Main extends ApplicationAdapter {
     @Override
     public void render() {
         float deltaTime = Gdx.graphics.getDeltaTime();
+        stateTime += deltaTime; // Update stateTime
+
 
         // Handle pause input
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
@@ -79,6 +86,7 @@ public class Main extends ApplicationAdapter {
 
                 Rectangle attackBounds = hero.getAttackBounds();
                 Rectangle heroBounds = hero.getBounds();
+
 
                 // Create a list to collect new enemies
                 List<Enemy> newEnemies = new ArrayList<>();
@@ -122,6 +130,11 @@ public class Main extends ApplicationAdapter {
                 // Add any new enemies collected during update
                 enemies.addAll(newEnemies);
 
+                for (NPC npc : npcs) {
+                    npc.checkHeroInZone(hero);
+                }
+
+
                 camera.update();
                 spriteBatch.setProjectionMatrix(camera.combined);
 
@@ -134,6 +147,16 @@ public class Main extends ApplicationAdapter {
                 // Render all enemies
                 for (Enemy enemy : enemies) {
                     enemy.render(spriteBatch);
+                }
+
+                for (NPC npc : npcs) {
+                    npc.render(spriteBatch, stateTime);
+                    String dialogueLine = npc.updateDialogue(deltaTime);
+                    if (dialogueLine != null) {
+                        font.getData().setScale(2f); // Adjust scale as needed
+                        font.draw(spriteBatch, npc.getName() + ": " + dialogueLine,
+                            100, 100); // Adjust Y position as needed
+                    }
                 }
 
                 spriteBatch.end();

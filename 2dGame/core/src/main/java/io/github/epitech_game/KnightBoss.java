@@ -316,6 +316,10 @@ public class KnightBoss extends Boss {
     public void update(List<Enemy> newEnemies) {
         super.update();
 
+        if (hero.maxHp <= 40) {
+            hero.takeDamage(40);
+        }
+
         if (!isAlive) {
             return;
         }
