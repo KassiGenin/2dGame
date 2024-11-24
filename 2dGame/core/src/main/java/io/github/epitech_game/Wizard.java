@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import java.util.List;
 
@@ -32,6 +33,8 @@ public class Wizard extends Enemy {
         attackStateTime = 0f;
         isAttacking = false;
         hasDealtDamage = false;
+
+
     }
 
     private Animation<TextureRegion> createAttackAnimation(Texture texture) {
@@ -177,22 +180,17 @@ public class Wizard extends Enemy {
 
     @Override
     public Rectangle getBounds() {
-        if (isAttacking && attackStateTime >= WARNING_DURATION) {
-            TextureRegion attackFrame = attackAnimation.getKeyFrame(attackStateTime, false);
+
             return new Rectangle(
-                attackX,
-                attackY,
-                attackFrame.getRegionWidth() * 3f,
-                attackFrame.getRegionHeight() * 3f
+                x-10,
+                y-10,
+                wizardTexture.getWidth()*0.2f+15,
+                wizardTexture.getHeight()*0.2f+15
             );
-        } else {
-            return new Rectangle(
-                x,
-                y,
-                wizardTexture.getWidth(),
-                wizardTexture.getHeight()
-            );
-        }
+
+
+
+
     }
 
     @Override
