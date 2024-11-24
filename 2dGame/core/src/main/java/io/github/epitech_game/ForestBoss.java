@@ -32,7 +32,7 @@ public class ForestBoss extends Boss {
     // Movement parameters
     private float moveTimer = 0f;
     private float MOVE_DURATION = 3f; // Move for 3 seconds
-    private float PAUSE_DURATION = 2f; // Pause for 1 second
+    private float PAUSE_DURATION = 3f; // Pause for 1 second
     private float pauseTimer = 0f;
     private boolean isMoving = true;
 
@@ -41,12 +41,12 @@ public class ForestBoss extends Boss {
     private boolean isAttacking = false;
     private boolean isUsingCapacity = false;
     private float actionTimer = 0f;
-    private final float ACTION_DURATION = 1f; // Duration of attack or capacity
+    private final float ACTION_DURATION = 3f; // Duration of attack or capacity
     private boolean capacityExecuted = false;
 
 
     public ForestBoss(Hero hero) {
-        super(200, false, 50); // Assuming the ForestBoss is not ranged  // before 2000
+        super(1000, false, 50); // Assuming the ForestBoss is not ranged  // before 2000
         this.hero = hero;
 
         // Load textures
@@ -364,7 +364,7 @@ public class ForestBoss extends Boss {
             currentFrame = currentAnimation.getKeyFrame(stateTime, true);
         }
         float width = currentFrame.getRegionWidth() * 0.8f;
-        float height = currentFrame.getRegionHeight() * 0.8f;
+        float height = currentFrame.getRegionHeight() * 0.7f;
         return new Rectangle(x, y, width, height);
     }
 

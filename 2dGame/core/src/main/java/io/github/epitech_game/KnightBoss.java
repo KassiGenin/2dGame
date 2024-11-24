@@ -33,7 +33,7 @@ public class KnightBoss extends Boss {
     // Movement parameters
     private float moveTimer = 0f;
     private float MOVE_DURATION = 15f; // Move for 3 seconds
-    private float PAUSE_DURATION = 1f; // Pause for 1 second
+    private float PAUSE_DURATION = 1.5f; // Pause for 1 second
     private float pauseTimer = 0f;
     private boolean isMoving = true;
 
@@ -42,7 +42,7 @@ public class KnightBoss extends Boss {
     private boolean isAttacking = false;
     private boolean isUsingCapacity = false;
     private float actionTimer = 0f;
-    private final float ACTION_DURATION = 1f; // Duration of attack or capacity
+    private final float ACTION_DURATION = 1.5f; // Duration of attack or capacity
     private boolean capacityExecuted = false;
 
 

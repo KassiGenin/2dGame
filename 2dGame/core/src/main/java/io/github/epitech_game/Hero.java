@@ -53,7 +53,7 @@ public class Hero extends Character {
     private TiledMapTileLayer collisionLayer;
 
     public Hero(TiledMapTileLayer collisionLayer) {
-        super(120,100, 1.5f, true);  // speed before 3.5 f
+        super(80,100, 1.5f, true);  // speed before 3.5 f
         this.maxHp = 120;
         this.collisionLayer = collisionLayer;
 
@@ -146,7 +146,7 @@ public class Hero extends Character {
             if (hp <= 0) {
                 handleDeath();
             } else {
-                setInvincible(2f); // Set invincibility duration to 2 seconds
+                setInvincible(1.4f); // Set invincibility duration to 2 seconds
             }
         }
     }
