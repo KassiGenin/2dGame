@@ -46,9 +46,9 @@ public class Main extends ApplicationAdapter {
         npcs = new Array<>();
 
 
-       NPC2 npc2 = new NPC2();
-       npc2.setPosition(100, 100);
-       npcs.add(npc2);
+        NPC2 npc2 = new NPC2();
+        npc2.setPosition(100, 100);
+        npcs.add(npc2);
 
 
 
