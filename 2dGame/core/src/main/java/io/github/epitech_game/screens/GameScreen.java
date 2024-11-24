@@ -6,6 +6,7 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.maps.tiled.TiledMap;
@@ -55,6 +56,7 @@ public class GameScreen implements Screen {
 
     private TiledMapTileLayer collisionLayer;
 
+
     public GameScreen(Main game, SpawnDirection spawnDirection) {
         this.game = game;
         this.spawnDirection = spawnDirection;
@@ -63,7 +65,6 @@ public class GameScreen implements Screen {
 
     private void initialize() {
         try {
-            // Load Tiled map
             TmxMapLoader mapLoader = new TmxMapLoader();
             map = mapLoader.load("maps/overworld.tmx");
             mapRenderer = new OrthogonalTiledMapRenderer(map);
@@ -74,7 +75,6 @@ public class GameScreen implements Screen {
             return;
         }
 
-        // Get map dimensions
         try {
             mapWidth = map.getProperties().get("width", Integer.class) * map.getProperties().get("tilewidth", Integer.class);
             mapHeight = map.getProperties().get("height", Integer.class) * map.getProperties().get("tileheight", Integer.class);
@@ -87,7 +87,6 @@ public class GameScreen implements Screen {
 
         stateTime = 0f;
 
-        // Initialize camera and viewport
         camera = new OrthographicCamera();
         viewport = new FitViewport(mapWidth, mapHeight, camera);
         viewport.apply();
@@ -95,11 +94,9 @@ public class GameScreen implements Screen {
         camera.position.set(mapWidth / 2f, mapHeight / 2f, 0);
         camera.update();
 
-        // Initialize HUD camera
         hudCamera = new OrthographicCamera();
         hudCamera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
-        // Access collision layer
         try {
             collisionLayer = (TiledMapTileLayer) map.getLayers().get("collisions");
             if (collisionLayer == null) {
@@ -114,7 +111,6 @@ public class GameScreen implements Screen {
             return;
         }
 
-        // Initialize hero
         try {
             hero = new Hero(collisionLayer);
             setHeroSpawnPosition();
@@ -125,12 +121,9 @@ public class GameScreen implements Screen {
             return;
         }
 
-        // Initialize enemies
         try {
             enemies = new ArrayList<>();
-
-            Gdx.app.log("GameScreen", "Enemy1 (Fly) initialized at (300,300)");
-
+            Gdx.app.log("GameScreen", "Enemies initialized");
         } catch (Exception e) {
             Gdx.app.error("GameScreen", "Failed to initialize enemies", e);
             Gdx.app.exit();
@@ -145,43 +138,38 @@ public class GameScreen implements Screen {
             npc1.setPosition(340, 235);
             npcs.add(npc2);
             npcs.add(npc1);
-            Gdx.app.log("GameScreen", "Enemy1 (Fly) initialized at (300,300)");
-
+            Gdx.app.log("GameScreen", "NPCs initialized");
         } catch (Exception e) {
-            Gdx.app.error("GameScreen", "Failed to initialize enemies", e);
+            Gdx.app.error("GameScreen", "Failed to initialize NPCs", e);
             Gdx.app.exit();
             return;
         }
 
-
-
-        // Initialize rendering tools
         spriteBatch = new SpriteBatch();
         font = new BitmapFont();
         font.setColor(Color.WHITE);
+
     }
-    /**
-     * Sets the hero's spawn position based on the spawn direction.
-     */
+
     private void setHeroSpawnPosition() {
-        float heroWidth = hero.getWidth();   // Ensure Hero class has getWidth()
-        float heroHeight = hero.getHeight(); // Ensure Hero class has getHeight()
+        float heroWidth = hero.getWidth();
+        float heroHeight = hero.getHeight();
 
         switch (spawnDirection) {
             case FROM_TOP:
-                hero.setPosition(mapWidth / 2f, mapHeight - heroHeight - 10); // Top center with padding
+                hero.setPosition(mapWidth / 2f, mapHeight - heroHeight - 10);
                 break;
             case FROM_BOTTOM:
-                hero.setPosition(mapWidth / 2f, 10); // Bottom center with padding
+                hero.setPosition(mapWidth / 2f, 10);
                 break;
             case FROM_LEFT:
-                hero.setPosition(10, mapHeight / 2f); // Left center with padding
+                hero.setPosition(10, mapHeight / 2f);
                 break;
             case FROM_RIGHT:
-                hero.setPosition(mapWidth - heroWidth - 10, mapHeight / 2f); // Right center with padding
+                hero.setPosition(mapWidth - heroWidth - 10, mapHeight / 2f);
                 break;
             case CENTER:
-                hero.setPosition(mapWidth / 2f - heroWidth / 2f, mapHeight / 2f - heroHeight / 2f); // Center of the screen
+                hero.setPosition(mapWidth / 2f - heroWidth / 2f, mapHeight / 2f - heroHeight / 2f);
                 break;
         }
     }
@@ -189,83 +177,79 @@ public class GameScreen implements Screen {
     @Override
     public void render(float delta) {
         float deltaTime = Gdx.graphics.getDeltaTime();
-        stateTime += Gdx.graphics.getDeltaTime();
-        // Handle pause input
+        stateTime += deltaTime;
+
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
-            isPaused = !isPaused;
+            if (inCredits) {
+                inCredits = false;
+            } else {
+                isPaused = !isPaused;
+            }
         }
 
         if (!isPaused) {
             if (!hero.isDead()) {
-                updateGameLogic(delta);
+                updateGameLogic(deltaTime);
             } else {
                 renderGameOver();
                 return;
             }
         }
 
-        // Clear the screen and render the map
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         mapRenderer.setView(camera);
         mapRenderer.render();
 
-        // Render the game elements
         spriteBatch.setProjectionMatrix(camera.combined);
         spriteBatch.begin();
-        hero.render(spriteBatch);
 
-        for (Enemy enemy : enemies) {
-            enemy.render(spriteBatch);
-        }
 
-        for (NPC npc : npcs) {
-            npc.checkHeroInZone(hero);
-        }
-        for (NPC npc : npcs) {
-            npc.render(spriteBatch, stateTime);
-            String dialogueLine = npc.updateDialogue(deltaTime);
-            if (dialogueLine != null) {
-                font.getData().setScale(0.8f); // Adjust scale as needed
-                font.draw(spriteBatch, npc.getName() + ": " + dialogueLine,
-                    50, 50); // Adjust Y position as needed
+
+        if (!isPaused) {
+            hero.render(spriteBatch);
+            for (Enemy enemy : enemies) {
+                enemy.render(spriteBatch);
             }
+            for (NPC npc : npcs) {
+                npc.checkHeroInZone(hero);
+            }
+
+            for (NPC npc : npcs) {
+                npc.render(spriteBatch, stateTime);
+                String dialogueLine = npc.updateDialogue(deltaTime);
+                if (dialogueLine != null) {
+                    font.getData().setScale(0.8f);
+                    font.draw(spriteBatch, npc.getName() + ": " + dialogueLine,
+                        50, 50);
+                }
+            }
+        } else {
+            spriteBatch.setColor(0, 0, 0, 0.5f);
+            spriteBatch.setColor(1, 1, 1, 1);
         }
 
         spriteBatch.end();
-        // Render HUD elements (hearts, pause menu)
-        spriteBatch.setProjectionMatrix(hudCamera.combined);
-        spriteBatch.begin();
-        hero.renderHearts(spriteBatch);
 
         if (isPaused) {
             renderPauseMenu();
         }
-        spriteBatch.end(); // Ensure SpriteBatch is closed properly
     }
 
-    /**
-     * Updates game logic, including hero movement, enemy behavior, and collision detection.
-     *
-     * @param delta Time elapsed since the last frame.
-     */
-    private void updateGameLogic(float delta) {
+    private void updateGameLogic(float deltaTime) {
         hero.update();
         hero.move();
 
         Rectangle attackBounds = hero.getAttackBounds();
         Rectangle heroBounds = hero.getBounds();
 
-        // Create a list to collect new enemies
         List<Enemy> newEnemies = new ArrayList<>();
 
-        // Update enemies and check collisions
         Iterator<Enemy> enemyIterator = enemies.iterator();
         while (enemyIterator.hasNext()) {
             Enemy enemy = enemyIterator.next();
             enemy.update(newEnemies);
 
-            // Check for collisions with hero attack
             if (attackBounds != null && enemy.isAlive()) {
                 Rectangle enemyBounds = enemy.getBounds();
                 if (attackBounds.overlaps(enemyBounds)) {
@@ -273,29 +257,21 @@ public class GameScreen implements Screen {
                 }
             }
 
-            // Check for collisions with hero
             if (enemy.isAlive()) {
                 Rectangle enemyBounds = enemy.getBounds();
                 if (heroBounds.overlaps(enemyBounds)) {
-                    // Implement enemy-specific damage logic
                     hero.takeDamage(enemy.getAp());
                 }
             }
 
-            // Remove dead enemies
             if (!enemy.isAlive() && !enemy.isDying()) {
                 enemy.dispose();
                 enemyIterator.remove();
             }
         }
 
-        // Add new enemies to the list
         enemies.addAll(newEnemies);
 
-        // Check if hero crosses the screen border and determine the spawn direction
-        checkScreenBorders();
-
-        // Update the camera to follow the hero
         camera.position.set(
             Math.min(Math.max(hero.getX(), camera.viewportWidth / 2), mapWidth - camera.viewportWidth / 2),
             Math.min(Math.max(hero.getY(), camera.viewportHeight / 2), mapHeight - camera.viewportHeight / 2),
@@ -304,56 +280,6 @@ public class GameScreen implements Screen {
         camera.update();
     }
 
-    /**
-     * Checks if the hero has crossed the screen borders and initiates a screen transition.
-     */
-    private void checkScreenBorders() {
-        float heroX = hero.getX();
-        float heroY = hero.getY();
-        float heroWidth = hero.getWidth();   // Ensure Hero class has getWidth()
-        float heroHeight = hero.getHeight(); // Ensure Hero class has getHeight()
-
-        if (heroX < 0) {
-            // Hero crossed the left border
-            transitionToNewScreen(SpawnDirection.FROM_LEFT);
-        } else if (heroX + heroWidth > mapWidth) {
-            // Hero crossed the right border
-            transitionToNewScreen(SpawnDirection.FROM_RIGHT);
-        } else if (heroY + heroHeight > mapHeight) {
-            // Hero crossed the top border
-            transitionToNewScreen(SpawnDirection.FROM_TOP);
-        } else if (heroY < 0) {
-            // Hero crossed the bottom border
-            transitionToNewScreen(SpawnDirection.FROM_BOTTOM);
-        }
-    }
-
-    /**
-     * Handles the transition to a new screen with the specified spawn direction.
-     *
-     * @param direction The direction from which the hero is entering the new screen.
-     */
-    private void transitionToNewScreen(SpawnDirection direction) {
-        // Dispose current screen resources if necessary
-        dispose();
-
-        // Determine which screen to transition to based on direction
-        switch (direction) {
-            case FROM_TOP:
-                // Transition to GameScreen2
-                game.setScreen(new GameScreenFieldForest(game, SpawnDirection.FROM_BOTTOM));
-                break;
-            // Add more cases if transitioning to other screens
-            default:
-                // For simplicity, stay on the same screen or handle other transitions
-                game.setScreen(new GameScreen(game, direction));
-                break;
-        }
-    }
-
-    /**
-     * Renders the "Game Over" screen.
-     */
     private void renderGameOver() {
         spriteBatch.setProjectionMatrix(hudCamera.combined);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -367,13 +293,13 @@ public class GameScreen implements Screen {
         spriteBatch.end();
     }
 
-    /**
-     * Renders the pause menu.
-     */
     private void renderPauseMenu() {
         spriteBatch.setProjectionMatrix(hudCamera.combined);
         spriteBatch.begin();
+        font.getData().setScale(1.5f);
+
         if (inCredits) {
+            font.setColor(Color.WHITE);
             font.draw(spriteBatch, "Credits\nGame developed by Alain & Kassi",
                 100, Gdx.graphics.getHeight() - 100);
             font.draw(spriteBatch, "Press ESCAPE to return",
@@ -382,12 +308,43 @@ public class GameScreen implements Screen {
             float menuX = Gdx.graphics.getWidth() / 2f - 50;
             float menuY = Gdx.graphics.getHeight() / 2f + 50;
             for (int i = 0; i < pauseMenuOptions.length; i++) {
-                font.setColor(i == selectedOption ? Color.YELLOW : Color.WHITE);
+                if (i == selectedOption) {
+                    font.setColor(Color.YELLOW);
+                } else {
+                    font.setColor(Color.WHITE);
+                }
                 font.draw(spriteBatch, pauseMenuOptions[i],
-                    menuX, menuY - i * 30);
+                    menuX, menuY - i * 40);
             }
         }
         spriteBatch.end();
+
+        handlePauseMenuInput();
+    }
+
+    private void handlePauseMenuInput() {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
+            selectedOption--;
+            if (selectedOption < 0) {
+                selectedOption = pauseMenuOptions.length - 1;
+            }
+        }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.DOWN)) {
+            selectedOption++;
+            if (selectedOption >= pauseMenuOptions.length) {
+                selectedOption = 0;
+            }
+        }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
+            String selected = pauseMenuOptions[selectedOption];
+            if (selected.equals("Resume")) {
+                isPaused = false;
+            } else if (selected.equals("Settings")) {
+                // Implement Settings functionality
+            } else if (selected.equals("Credits")) {
+                inCredits = true;
+            }
+        }
     }
 
     @Override
@@ -416,13 +373,11 @@ public class GameScreen implements Screen {
 
     @Override
     public void pause() {
-        // Handle any logic for pausing the game if necessary
         isPaused = true;
     }
 
     @Override
     public void resume() {
-        // Handle any logic for resuming the game if necessary
         isPaused = false;
     }
 }
