@@ -152,7 +152,6 @@ public class ForestBoss extends Boss {
             if (distance == 0) {
                 distance = 0.0001f; // Avoid division by zero
             }
-
             float directionX = deltaX / distance;
             float directionY = deltaY / distance;
 
@@ -295,8 +294,10 @@ public class ForestBoss extends Boss {
                     currentFrame,
                     x,
                     y,
+
                     currentFrame.getRegionWidth() * 0.8f,
                     currentFrame.getRegionHeight() * 0.8f
+
                 );
             } return;
         }
