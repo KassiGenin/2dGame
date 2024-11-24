@@ -45,7 +45,7 @@ public class Main extends ApplicationAdapter {
 
 
         Wizard wizard = new Wizard(hero);
-        wizard.setPosition(700, 700);
+        wizard.setPosition(500, 500);
         enemies.add(wizard);
 
         // Initialize rendering tools

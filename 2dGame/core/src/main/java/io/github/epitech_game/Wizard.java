@@ -132,8 +132,8 @@ public class Wizard extends Enemy {
                     deathFrame,
                     x,
                     y,
-                    deathFrame.getRegionWidth() * 5f,
-                    deathFrame.getRegionHeight() * 5f
+                    deathFrame.getRegionWidth() * 2f,
+                    deathFrame.getRegionHeight() * 2f
                 );
             }
             return;
@@ -144,8 +144,8 @@ public class Wizard extends Enemy {
             wizardTexture,
             x,
             y,
-            wizardTexture.getWidth(),
-            wizardTexture.getHeight()
+            wizardTexture.getWidth() * 0.2f,
+            wizardTexture.getHeight()*0.2f
         );
 
         if (isAttacking) {

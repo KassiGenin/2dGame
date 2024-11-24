@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.random.RandomGenerator;
 
 public class KnightBoss extends Boss {
     private Hero hero;
@@ -29,7 +30,7 @@ public class KnightBoss extends Boss {
 
     // Movement parameters
     private float moveTimer = 0f;
-    private float MOVE_DURATION = 3f; // Move for 3 seconds
+    private float MOVE_DURATION = 15f; // Move for 3 seconds
     private float PAUSE_DURATION = 1f; // Pause for 1 second
     private float pauseTimer = 0f;
     private boolean isMoving = true;
@@ -248,13 +249,13 @@ public class KnightBoss extends Boss {
     }
 
     private void spawnFlies(List<Enemy> newEnemies) {
-        Fly fly1 = new Fly(hero);
-        fly1.setPosition(0, Gdx.graphics.getHeight() - 50);
-        newEnemies.add(fly1);
+        Wizard wizard1 = new Wizard(hero);
+        wizard1.setPosition((float) (Math.random() * 1000 + 100), (float) (Math.random() * 1000 + 100));
+        newEnemies.add(wizard1);
 
-        Fly fly2 = new Fly(hero);
-        fly2.setPosition(Gdx.graphics.getWidth() - 50, Gdx.graphics.getHeight() - 50);
-        newEnemies.add(fly2);
+        Wizard wizard2 = new Wizard(hero);
+        wizard2.setPosition((float) (Math.random() * 1000 + 100), (float) (Math.random() * 1000 + 100));
+        newEnemies.add(wizard2);
     }
     public void render(SpriteBatch spriteBatch) {
         if (!isAlive && !isDying) {
