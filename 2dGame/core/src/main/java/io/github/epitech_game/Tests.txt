@@ -1,0 +1,164 @@
+/*
+HeroTest.java
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+class HeroTest {
+
+    private Hero hero;
+
+    @BeforeEach
+    void setUp() {
+        hero = new Hero();
+    }
+
+    @Test
+    void testTakeDamageReducesHealth() {
+        int initialHealth = hero.getHealth(); // Assumes getHealth() method exists
+        int damage = 20;
+        hero.takeDamage(damage);
+        assertEquals(initialHealth - damage, hero.getHealth(),
+            "Hero's health should decrease by the damage amount.");
+    }
+
+    @Test
+    void testHeroIsDeadWhenHealthZero() {
+        hero.takeDamage(hero.getHealth()); // Reduces health to zero
+        assertTrue(hero.isDead(),
+            "Hero should be dead when health reaches zero.");
+    }
+
+    @Test
+    void testHeroNotDeadWhenHealthAboveZero() {
+        hero.takeDamage(hero.getHealth() - 10); // Leaves some health
+        assertFalse(hero.isDead(),
+            "Hero should not be dead when health is above zero.");
+    }
+}
+
+WizardTest.java
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+import java.util.ArrayList;
+import java.util.List;
+
+class WizardTest {
+
+    private Wizard wizard;
+    private Hero hero;
+
+    @BeforeEach
+    void setUp() {
+        hero = new Hero();
+        wizard = new Wizard(hero);
+    }
+
+    @Test
+    void testSetPosition() {
+        float x = 500f;
+        float y = 500f;
+        wizard.setPosition(x, y);
+        assertEquals(x, wizard.getX(),
+            "Wizard's X position should be set correctly.");
+        assertEquals(y, wizard.getY(),
+            "Wizard's Y position should be set correctly.");
+    }
+
+    @Test
+    void testWizardTakeDamage() {
+        int initialAP = wizard.getAp(); // Assumes getAp() method exists
+        int damage = 10;
+        wizard.takeDamage(damage);
+        assertEquals(initialAP - damage, wizard.getAp(),
+            "Wizard's AP should decrease by the damage amount.");
+    }
+
+    @Test
+    void testWizardIsAliveAfterDamage() {
+        int damage = wizard.getAp() - 1;
+        wizard.takeDamage(damage);
+        assertTrue(wizard.isAlive(),
+            "Wizard should still be alive after taking damage less than its AP.");
+    }
+
+    @Test
+    void testWizardIsDeadAfterExcessiveDamage() {
+        int damage = wizard.getAp() + 10;
+        wizard.takeDamage(damage);
+        assertFalse(wizard.isAlive(),
+            "Wizard should be dead after taking damage exceeding its AP.");
+    }
+
+    @Test
+    void testUpdateWithEmptyEnemiesList() {
+        List<Enemy> newEnemies = new ArrayList<>();
+        assertDoesNotThrow(() -> wizard.update(newEnemies),
+            "Wizard's update method should handle empty enemy lists without throwing exceptions.");
+    }
+}
+
+NPC1Test.java
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+class NPC1Test {
+
+    private NPC1 npc1;
+    private Hero hero;
+
+    @BeforeEach
+    void setUp() {
+        npc1 = new NPC1();
+        hero = new Hero();
+        npc1.setPosition(300f, 200f);
+    }
+
+    @Test
+    void testDialogueNotDisplayedWhenHeroOutOfZone() {
+        // Ensure hero is out of zone
+        hero.setPosition(0f, 0f);
+        npc1.checkHeroInZone(hero);
+        String dialogue = npc1.updateDialogue(3f); // Assumes dialogueDisplayTime = 3f
+        assertNull(dialogue,
+            "Dialogue should not be displayed when hero is outside the detection zone.");
+    }
+
+    @Test
+    void testDialogueDisplayedWhenHeroInZone() {
+        // Set hero within zone
+        hero.setPosition(310f, 210f); // Within zone radius of 150
+        npc1.checkHeroInZone(hero);
+        String dialogue = npc1.updateDialogue(3f);
+        assertNotNull(dialogue,
+            "Dialogue should be displayed when hero is within the detection zone.");
+        assertEquals("Greetings, traveler.", dialogue,
+            "First dialogue line should match the expected text.");
+    }
+
+    @Test
+    void testDialogueProgression() {
+        // Set hero within zone
+        hero.setPosition(310f, 210f); // Within zone radius
+        npc1.checkHeroInZone(hero);
+
+        String firstDialogue = npc1.updateDialogue(3f);
+        assertEquals("Greetings, traveler.", firstDialogue,
+            "First dialogue line should be 'Greetings, traveler.'");
+
+        String secondDialogue = npc1.updateDialogue(3f);
+        assertEquals("The forest holds many secrets.", secondDialogue,
+            "Second dialogue line should be 'The forest holds many secrets.'");
+
+        String thirdDialogue = npc1.updateDialogue(3f);
+        assertEquals("Stay vigilant on your journey.", thirdDialogue,
+            "Third dialogue line should be 'Stay vigilant on your journey.'");
+
+        String noDialogue = npc1.updateDialogue(3f);
+        assertNull(noDialogue,
+            "No dialogue should be displayed after all dialogue lines have been shown.");
+    }
+}
+*/

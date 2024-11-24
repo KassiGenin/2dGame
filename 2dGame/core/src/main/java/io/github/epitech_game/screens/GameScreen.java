@@ -342,7 +342,7 @@ public class GameScreen implements Screen {
         spriteBatch.setProjectionMatrix(hudCamera.combined);
         spriteBatch.begin();
         if (inCredits) {
-            font.draw(spriteBatch, "Credits\nGame developed by [Your Name]",
+            font.draw(spriteBatch, "Credits\nGame developed by Alain & Kassi",
                 100, Gdx.graphics.getHeight() - 100);
             font.draw(spriteBatch, "Press ESCAPE to return",
                 100, Gdx.graphics.getHeight() - 200);
