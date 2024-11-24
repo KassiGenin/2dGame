@@ -46,7 +46,7 @@ public class ForestBoss extends Boss {
 
 
     public ForestBoss(Hero hero) {
-        super(200, false, 50); // Assuming the ForestBoss is not ranged
+        super(2000, false, 50); // Assuming the ForestBoss is not ranged  // before 2000
         this.hero = hero;
 
         // Load textures
@@ -294,8 +294,10 @@ public class ForestBoss extends Boss {
                     currentFrame,
                     x,
                     y,
-                    currentFrame.getRegionWidth() * 6f,
-                    currentFrame.getRegionHeight() * 6f
+
+                    currentFrame.getRegionWidth() * 0.8f,
+                    currentFrame.getRegionHeight() * 0.8f
+
                 );
             } return;
         }
@@ -326,8 +328,8 @@ public class ForestBoss extends Boss {
             currentFrame,
             x,
             y,
-            currentFrame.getRegionWidth() * 2f,
-            currentFrame.getRegionHeight() * 2f
+            currentFrame.getRegionWidth() * 0.8f,
+            currentFrame.getRegionHeight() * 0.8f
         );
     }
     @Override
@@ -356,8 +358,8 @@ public class ForestBoss extends Boss {
         } else {
             currentFrame = currentAnimation.getKeyFrame(stateTime, true);
         }
-        float width = currentFrame.getRegionWidth() * 2f;
-        float height = currentFrame.getRegionHeight() * 2f;
+        float width = currentFrame.getRegionWidth() * 0.8f;
+        float height = currentFrame.getRegionHeight() * 0.8f;
         return new Rectangle(x, y, width, height);
     }
 
@@ -388,6 +390,5 @@ public class ForestBoss extends Boss {
         if (attackTexture != null) attackTexture.dispose();
     }
 }
-
 
 

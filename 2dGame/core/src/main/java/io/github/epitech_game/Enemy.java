@@ -29,8 +29,10 @@ public abstract class Enemy extends Character {
         this.range = range;
 
 
-            deathTexture = new Texture("enemyExplode.png");
-            deathAnimation = createDeathAnimation(deathTexture);
+
+        deathTexture = new Texture("enemyExplode.png");
+        deathAnimation = createDeathAnimation(deathTexture);
+
 
     }
 
@@ -80,6 +82,7 @@ public abstract class Enemy extends Character {
     @Override
     public void handleDeath() {
         super.handleDeath();
+
          //removing the !isboss  allows me to kill the boss but fucks up the screen
             // Start death animation
             isDying = true;
@@ -87,6 +90,7 @@ public abstract class Enemy extends Character {
             this.speed = 0f;
             this.isHittable = false;
             this.isInvincible = true;
+
 
     }
 

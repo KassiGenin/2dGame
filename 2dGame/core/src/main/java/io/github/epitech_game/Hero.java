@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 
 public class Hero extends Character {
 
@@ -48,9 +49,14 @@ public class Hero extends Character {
     private Animation<TextureRegion> currentAttackAnimation;
     private Animation<TextureRegion> currentAttackHeroAnimation;
 
-    public Hero() {
-        super(120, 100, 3.5f, true);
+    //Collisions attributes
+    private TiledMapTileLayer collisionLayer;
+
+    public Hero(TiledMapTileLayer collisionLayer) {
+        super(120,100, 2.5f, true);  // speed before 3.5 f
         this.maxHp = 120;
+        this.collisionLayer = collisionLayer;
+
 
         // Load spritesheets
         spriteSheet = new Texture("link_spritesheet_fixed.png");
@@ -201,8 +207,8 @@ public class Hero extends Character {
     }
 
     public Rectangle getBounds() {
-        float width = 32 * Main.SCALE_FACTOR;
-        float height = 32 * Main.SCALE_FACTOR;
+        float width = 32 * GameConstants.SCALE_FACTOR;
+        float height = 32 * GameConstants.SCALE_FACTOR;
         return new Rectangle(x, y, width, height);
     }
 
@@ -225,6 +231,13 @@ public class Hero extends Character {
         return new Animation<>(ATTACK_DURATION / frameCount, animationFrames);
     }
 
+    public float getWidth() {
+        return 32 * GameConstants.SCALE_FACTOR;
+    }
+
+    public float getHeight() {
+        return 32 * GameConstants.SCALE_FACTOR;
+    }
     public Animation<TextureRegion> createAnimation(TextureRegion[][] frames, int row, int startCol, int endCol, float duration) {
         TextureRegion[] animationFrames = new TextureRegion[endCol - startCol + 1];
         float frameDuration = duration / (endCol - startCol + 1); // Dynamic frame duration
@@ -240,23 +253,27 @@ public class Hero extends Character {
         int remainder = hp % 4;     // Remaining HP for partial hearts
 
         float baseX = 20; // X offset
-        float baseY = Gdx.graphics.getHeight() - (40 * Main.SCALE_FACTOR); // Top-left corner
+        float baseY = Gdx.graphics.getHeight() - 50;// Top-left corner
+
+
+        float heartWidth = 40; // Set the width of the hearts
+        float heartHeight = 40; // Set the height of the hearts
 
         for (int i = 0; i < totalHearts; i++) {
-            float x = baseX + i * (20 * Main.SCALE_FACTOR);
+            float x = baseX + i * (heartWidth +10) ; // Add a margin 10 between hearts
             float y = baseY;
 
             // Render heart background and border with scaling
-            spriteBatch.draw(heartBg, x, y, 17 * Main.SCALE_FACTOR, 17 * Main.SCALE_FACTOR);
-            spriteBatch.draw(heartBorder, x, y, 17 * Main.SCALE_FACTOR, 17 * Main.SCALE_FACTOR);
+            spriteBatch.draw(heartBg, x, y,heartWidth  , heartHeight);
+            spriteBatch.draw(heartBorder, x, y, heartWidth , heartHeight);
 
             // Render heart state with scaling
             if (i < fullHearts) {
-                spriteBatch.draw(hearts[0], x, y, 17 * Main.SCALE_FACTOR, 17 * Main.SCALE_FACTOR);
+                spriteBatch.draw(hearts[0], x, y, heartWidth , heartHeight);
             } else if (i == fullHearts && remainder > 0) {
-                spriteBatch.draw(hearts[4 - remainder], x, y, 17 * Main.SCALE_FACTOR, 17 * Main.SCALE_FACTOR);
+                spriteBatch.draw(hearts[4 - remainder], x, y, heartWidth , heartHeight);
             } else {
-                spriteBatch.draw(hearts[4], x, y, 17 * Main.SCALE_FACTOR, 17 * Main.SCALE_FACTOR);
+                spriteBatch.draw(hearts[4], x, y, heartWidth , heartHeight);
             }
         }
     }
@@ -271,9 +288,16 @@ public class Hero extends Character {
         // Handle dashing
         if (isDashing) {
             dashTimer += deltaTime;
-            x += dashDirectionX * DASH_DISTANCE * deltaTime / DASH_DURATION;
-            y += dashDirectionY * DASH_DISTANCE * deltaTime / DASH_DURATION;
+            float newX = x + dashDirectionX * DASH_DISTANCE * deltaTime / DASH_DURATION;
+            float newY = y + dashDirectionY * DASH_DISTANCE * deltaTime / DASH_DURATION;
 
+            // Collision detection during dash
+            if (!isCollision(newX, y)) {
+                x = newX;
+            }
+            if (!isCollision(x, newY)) {
+                y = newY;
+            }
             stateTime += deltaTime;
 
             if (dashTimer >= DASH_DURATION) {
@@ -287,25 +311,36 @@ public class Hero extends Character {
 
         // Handle movement
         if (!isAttacking) { // Disable movement while attacking
+            float newX = x;
+            float newY = y;
+
             if (Gdx.input.isKeyPressed(Input.Keys.W)) {
-                y += speed;
+                newY += speed;
                 currentAnimation = walkUp;
                 isMoving = true;
             }
             if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-                y -= speed;
+                newY -= speed;
                 currentAnimation = walkDown;
                 isMoving = true;
             }
             if (Gdx.input.isKeyPressed(Input.Keys.A)) {
-                x -= speed;
+                newX -= speed;
                 currentAnimation = walkLeft;
                 isMoving = true;
             }
             if (Gdx.input.isKeyPressed(Input.Keys.D)) {
-                x += speed;
+                newX += speed;
                 currentAnimation = walkRight;
                 isMoving = true;
+            }
+
+            // Collision detection
+            if (!isCollision(newX, y)) {
+                x = newX;
+            }
+            if (!isCollision(x, newY)) {
+                y = newY;
             }
         }
 
@@ -370,44 +405,35 @@ public class Hero extends Character {
                 currentHeroAttackFrame,
                 x,
                 y,
-                currentHeroAttackFrame.getRegionWidth() * Main.SCALE_FACTOR,
-                currentHeroAttackFrame.getRegionHeight() * Main.SCALE_FACTOR
+                currentHeroAttackFrame.getRegionWidth() * GameConstants.SCALE_FACTOR,
+                currentHeroAttackFrame.getRegionHeight() * GameConstants.SCALE_FACTOR
             );
 
-            // Position the slash animation based on direction
+            // Define scaling factors
+            float slashScale = GameConstants.SCALE_FACTOR*0.8f; // a modifier apres
+            float offsetX = 0;
+            float offsetY = 0;
+
+            // Calculate offsets based on direction
             if (currentAttackAnimation == slashUp) {
-                spriteBatch.draw(
-                    currentSlashFrame,
-                    x,
-                    y + 32 * 1.2f,
-                    currentSlashFrame.getRegionWidth() * 1.9f,
-                    currentSlashFrame.getRegionHeight() * 1.9f
-                );
+                offsetY = 32 * GameConstants.SCALE_FACTOR;
             } else if (currentAttackAnimation == slashDown) {
-                spriteBatch.draw(
-                    currentSlashFrame,
-                    x,
-                    y - 37 * 1.2f,
-                    currentSlashFrame.getRegionWidth() * 1.9f,
-                    currentSlashFrame.getRegionHeight() * 1.9f
-                );
+                offsetY = -37 * GameConstants.SCALE_FACTOR;
             } else if (currentAttackAnimation == slashLeft) {
-                spriteBatch.draw(
-                    currentSlashFrame,
-                    x - 66 * 1.3f,
-                    y,
-                    currentSlashFrame.getRegionWidth() * 1.7f,
-                    currentSlashFrame.getRegionHeight() * 1.7f
-                );
+                offsetX = -66 * GameConstants.SCALE_FACTOR;
             } else if (currentAttackAnimation == slashRight) {
-                spriteBatch.draw(
-                    currentSlashFrame,
-                    x + 32 * 1.5f,
-                    y + 10,
-                    currentSlashFrame.getRegionWidth() * 1.7f,
-                    currentSlashFrame.getRegionHeight() * 1.7f
-                );
+                offsetX = 32 * GameConstants.SCALE_FACTOR;
+                offsetY = 10 * GameConstants.SCALE_FACTOR; // Adjust if necessary
             }
+
+            // Draw the slash animation
+            spriteBatch.draw(
+                currentSlashFrame,
+                x + offsetX,
+                y + offsetY,
+                currentSlashFrame.getRegionWidth() * slashScale,
+                currentSlashFrame.getRegionHeight() * slashScale
+            );
 
             // End the attack animation when it finishes
             if (attackTimer >= ATTACK_DURATION) {
@@ -420,8 +446,8 @@ public class Hero extends Character {
                 currentFrame,
                 x,
                 y,
-                currentFrame.getRegionWidth() * Main.SCALE_FACTOR,
-                currentFrame.getRegionHeight() * Main.SCALE_FACTOR
+                currentFrame.getRegionWidth() * GameConstants.SCALE_FACTOR,
+                currentFrame.getRegionHeight() * GameConstants.SCALE_FACTOR
             );
         }
     }
@@ -478,4 +504,39 @@ public class Hero extends Character {
         if (attackLeftSheet != null) attackLeftSheet.dispose();
         if (attackRightSheet != null) attackRightSheet.dispose();
     }
+    private boolean isCollision(float x, float y) {
+        // Get the collision layer's tile dimensions
+        float tileWidth = collisionLayer.getTileWidth();
+        float tileHeight = collisionLayer.getTileHeight();
+
+        // Define the hero's bounding box dimensions
+        float width = 28 * GameConstants.SCALE_FACTOR;
+        float height = 28 * GameConstants.SCALE_FACTOR;
+
+        // Check all four corners of the hero's bounding box
+        int[][] corners = new int[][]{
+            {(int) (x / tileWidth), (int) (y / tileHeight)}, // Bottom-left
+            {(int) ((x + width) / tileWidth), (int) (y / tileHeight)}, // Bottom-right
+            {(int) (x / tileWidth), (int) ((y + height) / tileHeight)}, // Top-left
+            {(int) ((x + width) / tileWidth), (int) ((y + height) / tileHeight)} // Top-right
+        };
+
+        for (int[] corner : corners) {
+            int tileX = corner[0];
+            int tileY = corner[1];
+            TiledMapTileLayer.Cell cell = collisionLayer.getCell(tileX, tileY);
+            if (cell != null && cell.getTile() != null) {
+                int tileID = cell.getTile().getId();
+//                if (tileID != 0) {
+//                    return true; // Collision detected
+//                }
+                // Assuming that any tile in the collision layer represents a collision
+                return true; // Collision detected
+            }
+        }
+        return false; // No collision
+    }
+
+
+
 }

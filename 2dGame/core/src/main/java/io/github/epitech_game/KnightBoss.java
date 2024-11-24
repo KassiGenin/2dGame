@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.random.RandomGenerator;
@@ -23,6 +24,7 @@ public class KnightBoss extends Boss {
     private boolean flipSprite = false;
 
     // Attack animations
+
     private Animation<TextureRegion> attackDownAnimation;
     private Animation<TextureRegion> attackLeftAnimation;
     private Animation<TextureRegion> attackRightAnimation;
@@ -128,6 +130,7 @@ public class KnightBoss extends Boss {
 
             float distance = (float) Math.sqrt(deltaX * deltaX + deltaY * deltaY);
             if (distance == 0) {
+
                 distance = 0.0001f; // Avoid division by zero
             }
 

@@ -144,8 +144,8 @@ public class Fly extends Enemy {
                     currentFrame,
                     x,
                     y,
-                    currentFrame.getRegionWidth() * 2f,
-                    currentFrame.getRegionHeight() * 2f
+                    currentFrame.getRegionWidth() * 0.5f,
+                    currentFrame.getRegionHeight() * 0.5f
                 );
             }
         } else {
@@ -172,8 +172,8 @@ public class Fly extends Enemy {
                 currentFrame,
                 x,
                 y,
-                currentFrame.getRegionWidth() * 2f,
-                currentFrame.getRegionHeight() * 2f
+                currentFrame.getRegionWidth() *0.5f,
+                currentFrame.getRegionHeight() * 0.5f
             );
 
             // Reset color to default
@@ -184,8 +184,8 @@ public class Fly extends Enemy {
     // Method to get the fly's bounding rectangle for collision detection
     public Rectangle getBounds() {
         TextureRegion currentFrame = currentAnimation.getKeyFrame(stateTime, true);
-        float width = currentFrame.getRegionWidth() * 2f;
-        float height = currentFrame.getRegionHeight() * 2f;
+        float width = currentFrame.getRegionWidth() * 0.5f;
+        float height = currentFrame.getRegionHeight() * 0.5f;
         return new Rectangle(x, y, width, height);
     }
 
