@@ -146,8 +146,8 @@ public class Wizard extends Enemy {
                     deathFrame,
                     x,
                     y,
-                    deathFrame.getRegionWidth() * 2f,
-                    deathFrame.getRegionHeight() * 2f
+                    deathFrame.getRegionWidth() * 1f,
+                    deathFrame.getRegionHeight() * 1f
                 );
             }
             return;
@@ -158,8 +158,8 @@ public class Wizard extends Enemy {
             wizardTexture,
             x,
             y,
-            wizardTexture.getWidth() * 0.2f,
-            wizardTexture.getHeight()*0.2f
+            wizardTexture.getWidth() * 0.1f,
+            wizardTexture.getHeight()*0.1f
         );
 
         if (isAttacking) {
@@ -168,9 +168,9 @@ public class Wizard extends Enemy {
             spriteBatch.draw(
                 attackFrame,
                 attackX,
-                attackY,
-                attackFrame.getRegionWidth() * 3f,
-                attackFrame.getRegionHeight() * 3f
+                attackY-10,
+                attackFrame.getRegionWidth() * 1.5f,
+                attackFrame.getRegionHeight() * 1.5f
             );
         }
 
@@ -183,9 +183,9 @@ public class Wizard extends Enemy {
 
             return new Rectangle(
                 x-10,
-                y-10,
-                wizardTexture.getWidth()*0.2f+15,
-                wizardTexture.getHeight()*0.2f+15
+                y,
+                wizardTexture.getWidth()*0.1f,
+                wizardTexture.getHeight()*0.1f-5
             );
 
 
@@ -205,8 +205,8 @@ public class Wizard extends Enemy {
         return new Rectangle(
             attackX,
             attackY,
-            attackFrame.getRegionWidth() * 3f,
-            attackFrame.getRegionHeight() * 3f
+            attackFrame.getRegionWidth() * 1.5f,
+            attackFrame.getRegionHeight() * 1.5f
         );
     }
 }

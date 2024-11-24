@@ -17,7 +17,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import io.github.epitech_game.Hero;
 import io.github.epitech_game.Enemy;
 import io.github.epitech_game.Fly;
-import io.github.epitech_game.ForestBoss;
+import io.github.epitech_game.Wizard;
 import io.github.epitech_game.Main;
 import io.github.epitech_game.SpawnDirection;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
@@ -128,10 +128,10 @@ public class GameScreen implements Screen {
             enemies.add(fly);
             Gdx.app.log("GameScreen", "Enemy1 (Fly) initialized at (300,300)");
 
-            ForestBoss forestBoss = new ForestBoss(hero);
-            forestBoss.setPosition(150, 300);
+            Wizard forestBoss = new Wizard(hero);
+            forestBoss.setPosition(150, 100);
             enemies.add(forestBoss);
-            Gdx.app.log("GameScreen", "Enemy2 (ForestBoss) initialized at (500,500)");
+            Gdx.app.log("GameScreen", "Enemy2 (Wizard) initialized at (500,500)");
         } catch (Exception e) {
             Gdx.app.error("GameScreen", "Failed to initialize enemies", e);
             Gdx.app.exit();
