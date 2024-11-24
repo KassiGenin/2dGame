@@ -81,11 +81,11 @@ public abstract class Character {
         return this.speed;
     }
 
-    public Boolean getIsHittable() {
+    public boolean getIsHittable() {
         return this.isHittable;
     }
 
-    public Boolean getIsAlive() {
+    public boolean getIsAlive() {
         return this.isAlive;
     }
 

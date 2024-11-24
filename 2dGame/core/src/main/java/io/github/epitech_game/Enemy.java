@@ -9,12 +9,12 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import java.util.List;
 
 public abstract class Enemy extends Character {
-    private boolean isRanged;
-    private boolean isBoss;
-    private int range;
+    protected boolean isRanged;
+    protected boolean isBoss;
+    protected int range;
     protected boolean isInvincible = false;
-    private float invincibleTimer = 0f;
-    private final float INVINCIBILITY_DURATION = 0.25f;
+    protected float invincibleTimer = 0f;
+    protected final float INVINCIBILITY_DURATION = 0.25f;
 
     // Death animation fields
     protected Texture deathTexture;
@@ -28,11 +28,10 @@ public abstract class Enemy extends Character {
         this.isBoss = isBoss;
         this.range = range;
 
-        // Initialize death animation
-        if (!isBoss) {
+
             deathTexture = new Texture("enemyExplode.png");
             deathAnimation = createDeathAnimation(deathTexture);
-        }
+
     }
 
     public boolean isAlive() {
@@ -65,6 +64,8 @@ public abstract class Enemy extends Character {
         }
     }
 
+
+
     @Override
     public abstract void move();
 
@@ -79,14 +80,14 @@ public abstract class Enemy extends Character {
     @Override
     public void handleDeath() {
         super.handleDeath();
-        if (!isBoss) {
+         //removing the !isboss  allows me to kill the boss but fucks up the screen
             // Start death animation
             isDying = true;
             deathStateTime = 0f;
             this.speed = 0f;
             this.isHittable = false;
             this.isInvincible = true;
-        }
+
     }
 
     @Override
@@ -101,12 +102,18 @@ public abstract class Enemy extends Character {
         }
     }
 
+
     public void setInvincible(float duration) {
         isInvincible = true;
         invincibleTimer = duration;
     }
 
-    private Animation<TextureRegion> createDeathAnimation(Texture texture) {
+    public boolean isInvincible() {
+        return isInvincible;
+    }
+
+
+    protected Animation<TextureRegion> createDeathAnimation(Texture texture) {
         TextureRegion[][] tmpFrames = TextureRegion.split(texture, 48, 48);
         TextureRegion[] animationFrames = new TextureRegion[8];
 

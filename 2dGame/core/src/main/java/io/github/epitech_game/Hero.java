@@ -49,8 +49,8 @@ public class Hero extends Character {
     private Animation<TextureRegion> currentAttackHeroAnimation;
 
     public Hero() {
-        super(37, 100, 3.5f, true);
-        this.maxHp = 40;
+        super(120, 100, 3.5f, true);
+        this.maxHp = 120;
 
         // Load spritesheets
         spriteSheet = new Texture("link_spritesheet_fixed.png");

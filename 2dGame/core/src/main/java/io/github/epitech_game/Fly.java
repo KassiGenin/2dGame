@@ -148,7 +148,7 @@ public class Fly extends Enemy {
                     currentFrame.getRegionHeight() * 2f
                 );
             }
-        }else {
+        } else {
 
             TextureRegion currentFrame = currentAnimation.getKeyFrame(stateTime, true);
 
@@ -206,17 +206,10 @@ public class Fly extends Enemy {
         if (flyDownSheet != null) flyDownSheet.dispose();
     }
 
-    // Getter method for isAlive
-    public boolean isAlive() {
-        return isAlive;
-    }
 
     // Ensure you have the isInvincible() method if not already present
     public boolean isInvincible() {
         return isInvincible;
     }
 
-    public boolean isDying() {
-        return super.isDying;
-    }
 }
