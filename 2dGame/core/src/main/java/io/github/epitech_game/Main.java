@@ -41,15 +41,12 @@ public class Main extends ApplicationAdapter {
         hero = new Hero();
         enemies = new ArrayList<>();
 
-        // Add initial fly
-        Fly fly = new Fly(hero);
-        fly.setPosition(300, 300);
-        enemies.add(fly);
 
-        // Add forest boss
-        KnightBoss knightBoss = new KnightBoss(hero);
-        knightBoss.setPosition(500, 500);
-        enemies.add(knightBoss);
+
+
+        Wizard wizard = new Wizard(hero);
+        wizard.setPosition(700, 700);
+        enemies.add(wizard);
 
         // Initialize rendering tools
         spriteBatch = new SpriteBatch();
