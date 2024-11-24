@@ -10,6 +10,6 @@ public class Main extends Game {
     @Override
     public void create() {
         // Initialize the first screen with the CENTER spawn direction.
-        setScreen(new GameScreen(this, SpawnDirection.CENTER));
+        setScreen(new GameScreen(this, SpawnDirection.CENTER,GameMap.WORLD_3));
     }
 }
